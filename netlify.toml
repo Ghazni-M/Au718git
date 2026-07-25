@@ -3,9 +3,12 @@
 [build]
   command = "npm run build"
   publish = "dist"
-  node_version = "20"
+  # node_version = "20"   # Optional: Netlify usually handles this well
 
-# SPA Redirect - Important for React Router
+[build.environment]
+  NODE_ENV = "development"
+
+# SPA Routing for React Router
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -20,8 +23,11 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
-# CSP - Updated for MongoDB only
-    Content-Security-Policy = '''
+# Content Security Policy
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = """
       default-src 'self';
       script-src 'self' 'unsafe-inline';
       style-src 'self' 'unsafe-inline';
@@ -31,12 +37,9 @@
         https://*.mongodb.net 
         https://*.netlify.app 
         https://generativelanguage.googleapis.com;
-    '''
+    """
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
   external_node_modules = ["mongodb"]
-
-[build.environment]
-  NODE_ENV = "development"
