@@ -1,0 +1,42 @@
+# netlify.toml
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  node_version = "20"
+
+# SPA Redirect - Important for React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# CSP - Updated for MongoDB only
+    Content-Security-Policy = '''
+      default-src 'self';
+      script-src 'self' 'unsafe-inline';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https:;
+      font-src 'self' data:;
+      connect-src 'self' 
+        https://*.mongodb.net 
+        https://*.netlify.app 
+        https://generativelanguage.googleapis.com;
+    '''
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["mongodb"]
+
+[build.environment]
+  NODE_ENV = "production"

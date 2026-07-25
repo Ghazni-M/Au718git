@@ -1,0 +1,122 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A luxury gold product",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "karat": { "type": "string" },
+        "weight": { "type": "string" },
+        "description": { "type": "string" },
+        "images": { "type": "array" },
+        "stock": { "type": "number" },
+        "status": { "enum": ["published", "draft"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "category", "karat", "status", "stock"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Customer inquiry",
+      "type": "object",
+      "properties": {
+        "customerName": { "type": "string" },
+        "customerContact": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "enum": ["general", "consultation"] },
+        "serviceRequested": { "type": "string" },
+        "preferredDate": { "type": "string" },
+        "status": { "enum": ["unread", "read"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "adminNote": { "type": "string" }
+      },
+      "required": ["customerName", "customerContact", "message", "status"]
+    },
+    "Subscriber": {
+      "title": "Newsletter Subscriber",
+      "description": "Inner Circle member email",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" }
+      },
+      "required": ["email"]
+    },
+    "Campaign": {
+      "title": "Newsletter Campaign",
+      "description": "Sent newsletter record",
+      "type": "object",
+      "properties": {
+        "subject": { "type": "string" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "sentAt": { "type": "string", "format": "date-time" },
+        "recipientCount": { "type": "number" }
+      },
+      "required": ["subject", "content", "sentAt", "recipientCount"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin user record mapped by UID",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "enum": ["Admin", "Assistant admin"] }
+      },
+      "required": ["email", "role"]
+    },
+    "AdminRole": {
+      "title": "Admin Role",
+      "description": "Admin role mapped by email",
+      "type": "object",
+      "properties": {
+        "role": { "enum": ["Admin", "Assistant admin"] }
+      },
+      "required": ["role"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Product collection"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Categories for filtering"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Customer leads"
+    },
+    "/subscribers/{subscriberId}": {
+      "schema": "Subscriber",
+      "description": "Newsletter subscribers"
+    },
+    "/newsletters/{newsletterId}": {
+      "schema": "Campaign",
+      "description": "Sent campaign archives"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Admin user roles by UID"
+    },
+    "/admin_roles/{email}": {
+      "schema": "AdminRole",
+      "description": "Admin privileges by email address"
+    }
+  }
+}

@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
+
+  --color-gold: #D4AF37;
+  --color-gold-bright: #F9E29B;
+  --color-emerald-deep: #022c22;
+  --color-emerald-rich: #064e3b;
+  --color-luxury-black: #022c22;
+  --color-charcoal: #064e3b;
+}
+
+@layer base {
+  body {
+    @apply font-sans selection:bg-gold selection:text-emerald-deep min-h-screen relative bg-emerald-deep text-white;
+  }
+  * {
+    @apply border-white/10 outline-gold/50;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+.bg-lighting {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+              radial-gradient(circle at 20% 80%, rgba(6, 78, 59, 0.15) 0%, transparent 50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+}
+
+.gold-text {
+  background: linear-gradient(135deg, #D4AF37 0%, #F9E29B 50%, #D4AF37 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gold-shimmer {
+  background: linear-gradient(45deg, #8A6E2F 0%, #D4AF37 45%, #F9E29B 50%, #D4AF37 55%, #8A6E2F 100%);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.1) 70%,
+    transparent 100%
+  );
+  transform: rotate(30deg);
+  animation: shimmer 3s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { transform: translate(-100%, -100%) rotate(30deg); }
+  100% { transform: translate(100%, 100%) rotate(30deg); }
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: 'Geist Variable', sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(98% 0.01 160);
+  --foreground: oklch(5% 0.02 160);
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(5% 0.02 160);
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(5% 0.02 160);
+  --primary: oklch(25% 0.1 160);
+  --primary-foreground: oklch(98% 0.01 160);
+  --secondary: oklch(92% 0.02 160);
+  --secondary-foreground: oklch(25% 0.1 160);
+  --muted: oklch(92% 0.02 160);
+  --muted-foreground: oklch(40% 0.05 160);
+  --accent: oklch(92% 0.02 160);
+  --accent-foreground: oklch(25% 0.1 160);
+  --destructive: oklch(57.7% 0.245 27.325);
+  --border: oklch(85% 0.02 160);
+  --input: oklch(85% 0.02 160);
+  --ring: oklch(75% 0.15 85);
+  --chart-1: oklch(75% 0.15 85);
+  --chart-2: oklch(30% 0.1 160);
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: #022c22;
+  --foreground: #f0fdf4;
+  --card: #064e3b;
+  --card-foreground: #f0fdf4;
+  --popover: #064e3b;
+  --popover-foreground: #f0fdf4;
+  --primary: #D4AF37;
+  --primary-foreground: #022c22;
+  --secondary: #065f46;
+  --secondary-foreground: #f0fdf4;
+  --muted: #065f46;
+  --muted-foreground: #a7f3d0;
+  --accent: #065f46;
+  --accent-foreground: #f0fdf4;
+  --destructive: oklch(70.4% 0.191 22.216);
+  --border: rgba(212, 175, 55, 0.2);
+  --input: rgba(212, 175, 55, 0.1);
+  --ring: #D4AF37;
+  --chart-1: oklch(87% 0 0);
+}
