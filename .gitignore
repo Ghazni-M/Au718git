@@ -83,7 +83,7 @@ web_modules/
 
 # db.json
 
-.db.json
+*.db.json
 
 
 
