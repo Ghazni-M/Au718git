@@ -407,6 +407,19 @@ async function startServer() {
   app.use(express.json({ limit: '2mb' }));
   app.use(cookieParser());
 
+
+   // ====================== ROOT ROUTE (FIXED) ======================
+  app.get("/", (req, res) => {
+    res.send(`
+      <h1>🚀 AU718 Gold Backend</h1>
+      <p><strong>Server is running successfully on Railway!</strong></p>
+      <p>Time: ${new Date().toISOString()}</p>
+      <hr>
+      <p><a href="/api/db-status">→ Check Database Status</a></p>
+      <p><a href="/api/newsletter/subscribers">→ View Subscribers</a></p>
+    `);
+  });
+
   // Debug middleware
   app.use((req, res, next) => {
     if (req.path.startsWith('/api')) {
@@ -434,6 +447,7 @@ async function startServer() {
     }
   });
 
+  
 
 // ====================== NEWSLETTER ROUTES ======================
   app.get('/api/newsletter/subscribers', async (req, res) => {

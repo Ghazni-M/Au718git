@@ -21,7 +21,6 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "allowJs": true,
-    "allowImportingTsExtensions": true,
 
     "paths": {
       "@/*": ["./src/*"]
