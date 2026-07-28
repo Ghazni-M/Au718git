@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "node server.js",   
     "dev": "concurrently \"npm run server\" \"npm run frontend\"",
     "server": "tsx watch --clear-screen=false --ignore db.json --ignore db.json.tmp --ignore public/uploads/** server.ts",
     "frontend": "vite",
