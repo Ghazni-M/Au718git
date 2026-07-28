@@ -408,16 +408,6 @@ async function startServer() {
   app.use(cookieParser());
 
 
-   // ====================== ROOT ROUTE (FIXED) ======================
-  app.get("/", (req, res) => {
-    res.send(`
-      <h1>🚀 AU718 Gold Backend</h1>
-      <p><strong>Server is running successfully!</strong></p>
-      <p>Time: ${new Date().toISOString()}</p>
-      <hr>
-      <p><a href="/api/db-status">Check DB Status</a></p>
-    `);
-  });
 
  
   // Debug middleware
@@ -1167,7 +1157,7 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
   } else {
     console.log("🌐 Production mode - Serving API only");
   }
-  
+
   // ====================== START LISTENING ======================
   const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
