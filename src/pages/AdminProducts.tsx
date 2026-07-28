@@ -26,8 +26,8 @@ interface Product {
   name: string;
   category: string;
   karat: string;
-  weight: string | null;        // ← Fixed
-  description: string | null;   // ← Fixed
+  weight: string | null;
+  description: string | null;
   images: string[];
   stock: number;
   status: 'published' | 'draft';
@@ -50,7 +50,7 @@ export const AdminProducts = () => {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
-    karat: '18K',
+    karat: '18K' as string,
     weight: '',
     description: '',
     images: [] as string[],
@@ -191,8 +191,8 @@ export const AdminProducts = () => {
       name: product.name,
       category: product.category,
       karat: product.karat,
-      weight: product.weight ?? '',        // ← Fixed TS error
-      description: product.description ?? '', // ← Fixed TS error
+      weight: product.weight ?? '',
+      description: product.description ?? '',
       images: product.images || [],
       stock: product.stock || 0,
       status: product.status || 'published'
@@ -213,7 +213,6 @@ export const AdminProducts = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Header + Add Button */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-serif font-bold text-white mb-2 uppercase leading-none">Inventory Vault</h1>
@@ -253,7 +252,7 @@ export const AdminProducts = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
-                  <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
+                  <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v || ''})}>
                     <SelectTrigger className="bg-neutral-900 border-white/20 text-white">
                       <SelectValue placeholder="Select Category" />
                     </SelectTrigger>
@@ -275,7 +274,10 @@ export const AdminProducts = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Gold Purity</Label>
-                  <Select value={formData.karat} onValueChange={(v) => setFormData({...formData, karat: v})}>
+                  <Select 
+                    value={formData.karat} 
+                    onValueChange={(v) => setFormData({...formData, karat: v || '18K'})}   // ← Fixed here
+                  >
                     <SelectTrigger className="bg-neutral-900 border-white/20 text-white">
                       <SelectValue />
                     </SelectTrigger>
@@ -319,7 +321,7 @@ export const AdminProducts = () => {
                 />
               </div>
 
-              {/* Images Section */}
+              {/* Images */}
               <div className="space-y-4">
                 <Label>Product Images</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -339,9 +341,7 @@ export const AdminProducts = () => {
                       {isUploading ? (
                         <div className="flex flex-col items-center gap-3">
                           <Loader2 className="w-8 h-8 animate-spin text-gold" />
-                          <span className="text-sm text-white/70">
-                            Uploading image... {uploadProgress}%
-                          </span>
+                          <span className="text-sm text-white/70">Uploading image... {uploadProgress}%</span>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center gap-2">
@@ -392,7 +392,6 @@ export const AdminProducts = () => {
                 </div>
               </div>
 
-              {/* Status */}
               <div className="flex items-center justify-between py-4 border-t border-white/10">
                 <Label>Status</Label>
                 <div className="flex gap-3">
@@ -459,7 +458,7 @@ export const AdminProducts = () => {
               {filteredProducts.map((p) => {
                 const productId = p._id || p.id;
                 return (
-                  <TableRow key={productId}>
+                  <TableRow key={productId || Math.random()}>
                     <TableCell>
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-neutral-900">
