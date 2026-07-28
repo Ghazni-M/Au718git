@@ -412,14 +412,14 @@ async function startServer() {
   app.get("/", (req, res) => {
     res.send(`
       <h1>🚀 AU718 Gold Backend</h1>
-      <p><strong>Server is running successfully on Railway!</strong></p>
+      <p><strong>Server is running successfully!</strong></p>
       <p>Time: ${new Date().toISOString()}</p>
       <hr>
-      <p><a href="/api/db-status">→ Check Database Status</a></p>
-      <p><a href="/api/newsletter/subscribers">→ View Subscribers</a></p>
+      <p><a href="/api/db-status">Check DB Status</a></p>
     `);
   });
 
+ 
   // Debug middleware
   app.use((req, res, next) => {
     if (req.path.startsWith('/api')) {
@@ -1154,7 +1154,8 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
     next(err);
   });
 
-  // ====================== VITE MIDDLEWARE (LAST) ======================
+  
+   // ====================== VITE MIDDLEWARE (ONLY IN DEVELOPMENT) ======================
   if (process.env.NODE_ENV !== "production") {
     console.log("🛠️ Vite middleware mode activated");
     const { createServer: createViteServer } = await import('vite');
@@ -1163,8 +1164,10 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
       appType: 'spa',
     });
     app.use(vite.middlewares);
+  } else {
+    console.log("🌐 Production mode - Serving API only");
   }
-
+  
   // ====================== START LISTENING ======================
   const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
