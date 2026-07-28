@@ -22,6 +22,9 @@
     "moduleDetection": "force",
     "allowJs": true,
 
+    "allowImportingTsExtensions": true,     
+    "noEmit": true,                         
+
     "paths": {
       "@/*": ["./src/*"]
     }
