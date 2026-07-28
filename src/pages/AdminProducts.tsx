@@ -26,8 +26,8 @@ interface Product {
   name: string;
   category: string;
   karat: string;
-  weight: string;
-  description: string;
+  weight: string | null;        // ← Fixed
+  description: string | null;   // ← Fixed
   images: string[];
   stock: number;
   status: 'published' | 'draft';
@@ -92,43 +92,43 @@ export const AdminProducts = () => {
   }, [fetchData]);
 
   const handleSave = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!formData.name.trim() || !formData.category || !formData.weight.trim()) {
-    toast.error("Please fill in all required fields");
-    return;
-  }
-
-  setIsSaving(true);
-  try {
-    const productId = editingProduct?._id || editingProduct?.id;
-    const url = editingProduct 
-      ? `/api/db/products/${productId}`      // ← Correct endpoint
-      : '/api/products';                     // Create stays the same
-
-    const method = editingProduct ? 'PUT' : 'POST';
-
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || "Operation failed");
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.category || !formData.weight.trim()) {
+      toast.error("Please fill in all required fields");
+      return;
     }
 
-    toast.success(editingProduct ? "Product updated successfully" : "Product added successfully");
-    setIsOpen(false);
-    resetForm();
-    fetchData();
-  } catch (error: any) {
-    console.error(error);
-    toast.error(error.message || "Operation failed");
-  } finally {
-    setIsSaving(false);
-  }
-};
+    setIsSaving(true);
+    try {
+      const productId = editingProduct?._id || editingProduct?.id;
+      const url = editingProduct 
+        ? `/api/db/products/${productId}`
+        : '/api/products';
+
+      const method = editingProduct ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Operation failed");
+      }
+
+      toast.success(editingProduct ? "Product updated successfully" : "Product added successfully");
+      setIsOpen(false);
+      resetForm();
+      fetchData();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Operation failed");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -185,20 +185,20 @@ export const AdminProducts = () => {
     }
   };
 
-const openEdit = (product: Product) => {
-  setEditingProduct(product);
-  setFormData({
-    name: product.name,
-    category: product.category,
-    karat: product.karat,
-    weight: product.weight || '',
-    description: product.description || '',
-    images: product.images || [],
-    stock: product.stock || 0,
-    status: product.status || 'published'
-  });
-  setIsOpen(true);
-};
+  const openEdit = (product: Product) => {
+    setEditingProduct(product);
+    setFormData({
+      name: product.name,
+      category: product.category,
+      karat: product.karat,
+      weight: product.weight ?? '',        // ← Fixed TS error
+      description: product.description ?? '', // ← Fixed TS error
+      images: product.images || [],
+      stock: product.stock || 0,
+      status: product.status || 'published'
+    });
+    setIsOpen(true);
+  };
 
   const filteredProducts = products
     .filter(p => p && (p.name || p._id || p.id))
@@ -229,16 +229,13 @@ const openEdit = (product: Product) => {
 
           <DialogContent className="max-w-2xl bg-neutral-950 border-gold/30 text-white max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-
               <DialogTitle 
-              className={`text-2xl font-serif uppercase transition-colors ${
-                editingProduct 
-                  ? 'text-gold'           // Gold for Edit mode
-                  : 'text-white'          // Default for Add New
-              }`}
-            >
-              {editingProduct ? 'Edit Piece' : 'Add New Product'}
-            </DialogTitle>
+                className={`text-2xl font-serif uppercase transition-colors ${
+                  editingProduct ? 'text-gold' : 'text-white'
+                }`}
+              >
+                {editingProduct ? 'Edit Piece' : 'Add New Product'}
+              </DialogTitle>
             </DialogHeader>
 
             <form onSubmit={handleSave} className="space-y-6 pt-4">
@@ -322,7 +319,7 @@ const openEdit = (product: Product) => {
                 />
               </div>
 
-              {/* Images */}
+              {/* Images Section */}
               <div className="space-y-4">
                 <Label>Product Images</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -339,15 +336,14 @@ const openEdit = (product: Product) => {
                       htmlFor="product-image"
                       className={`flex flex-col items-center justify-center w-full aspect-video rounded-xl border-2 border-dashed border-white/20 bg-neutral-900 hover:border-gold/40 transition-all cursor-pointer ${isUploading ? 'opacity-50' : ''}`}
                     >
-                     {isUploading ? (
-                      <div className="flex flex-col items-center gap-3">
-                        <Loader2 className="w-8 h-8 animate-spin text-gold" />
-                        <span className="text-sm text-white/70">
-                          Uploading image... {uploadProgress}%
-                        </span>
-                        <p className="text-xs text-white/50">This may take a few seconds</p>
-                      </div>
-                    ) : (
+                      {isUploading ? (
+                        <div className="flex flex-col items-center gap-3">
+                          <Loader2 className="w-8 h-8 animate-spin text-gold" />
+                          <span className="text-sm text-white/70">
+                            Uploading image... {uploadProgress}%
+                          </span>
+                        </div>
+                      ) : (
                         <div className="flex flex-col items-center gap-2">
                           <Upload className="w-8 h-8 text-white/40" />
                           <span className="text-sm text-white/60">Upload Image</span>
@@ -377,7 +373,6 @@ const openEdit = (product: Product) => {
                   </div>
                 </div>
 
-                {/* Image Previews */}
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
                   {formData.images.map((img, i) => (
                     <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-white/10 group">
@@ -432,7 +427,6 @@ const openEdit = (product: Product) => {
 
       {/* Products Table */}
       <Card className="bg-neutral-950 border-white/10 overflow-hidden">
-        {/* Search Bar */}
         <div className="p-6 border-b border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="relative max-w-sm w-full">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
@@ -487,7 +481,7 @@ const openEdit = (product: Product) => {
                     </TableCell>
                     <TableCell><Badge variant="secondary" className="capitalize">{p.category}</Badge></TableCell>
                     <TableCell><span className="font-serif text-gold">{p.karat}</span></TableCell>
-                    <TableCell><span className="font-serif text-gold">{p.weight}</span></TableCell>
+                    <TableCell><span className="font-serif text-gold">{p.weight ?? ''}</span></TableCell>
                     <TableCell>
                       <span className={`font-bold ${p.stock < 5 ? 'text-red-400' : 'text-gold'}`}>{p.stock}</span>
                     </TableCell>
