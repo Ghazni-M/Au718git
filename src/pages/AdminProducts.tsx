@@ -50,7 +50,7 @@ export const AdminProducts = () => {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
-    karat: '18K' as string,
+    karat: '18K',
     weight: '',
     description: '',
     images: [] as string[],
@@ -228,17 +228,12 @@ export const AdminProducts = () => {
 
           <DialogContent className="max-w-2xl bg-neutral-950 border-gold/30 text-white max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle 
-                className={`text-2xl font-serif uppercase transition-colors ${
-                  editingProduct ? 'text-gold' : 'text-white'
-                }`}
-              >
+              <DialogTitle className={`text-2xl font-serif uppercase transition-colors ${editingProduct ? 'text-gold' : 'text-white'}`}>
                 {editingProduct ? 'Edit Piece' : 'Add New Product'}
               </DialogTitle>
             </DialogHeader>
 
             <form onSubmit={handleSave} className="space-y-6 pt-4">
-              {/* Name & Category */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Product Name</Label>
@@ -270,14 +265,10 @@ export const AdminProducts = () => {
                 </div>
               </div>
 
-              {/* Karat & Weight */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Gold Purity</Label>
-                  <Select 
-                    value={formData.karat} 
-                    onValueChange={(v) => setFormData({...formData, karat: v || '18K'})}   // ← Fixed here
-                  >
+                  <Select value={formData.karat} onValueChange={(v) => setFormData({...formData, karat: v || '18K'})}>
                     <SelectTrigger className="bg-neutral-900 border-white/20 text-white">
                       <SelectValue />
                     </SelectTrigger>
