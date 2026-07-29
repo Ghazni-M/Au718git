@@ -10,6 +10,7 @@ import { randomUUID, randomBytes } from 'crypto';
 import { MongoClient, Db } from 'mongodb';
 import nodemailer from 'nodemailer';
 import 'dotenv/config';   
+import cors from "cors";
 
 
 // ====================== TYPE EXTENSION ======================
@@ -402,6 +403,18 @@ async function startServer() {
   await connectToMongo();
 
   const app = express();
+
+  app.use(cors({
+    origin: [
+      "http://localhost:5173",
+      "https://au718goldstore.netlify.app",
+    ],
+    credentials: true,
+  }));
+
+  app.use(express.json({ limit: "2mb" }));
+
+
   const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: '2mb' }));

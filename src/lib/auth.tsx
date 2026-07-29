@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { api } from "./api";
+
 
 export type AdminRole = 'Admin' | 'Assistant admin' | null;
 
@@ -59,8 +61,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/me', {
-        credentials: 'include',
+      const res = await api('/api/auth/me', {
+
         cache: 'no-store',
       });
 
@@ -93,10 +95,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [refreshAuth]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await fetch('/api/auth/login', {
+    const res = await api('/api/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 
@@ -111,10 +111,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signup = useCallback(async (email: string, password: string) => {
-    const res = await fetch('/api/auth/signup', {
+    const res = await api('/api/auth/signup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 
@@ -130,9 +128,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(async () => {
     try {
-      await fetch('/api/auth/logout', {
+      await api('/api/auth/logout', {
         method: 'POST',
-        credentials: 'include',
       });
     } catch (error) {
       console.error('Logout error:', error);

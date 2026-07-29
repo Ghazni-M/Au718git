@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { MessageSquare, Mail, Phone, Trash2, CheckCircle2, Clock, User, Gem } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '../components/ui/skeleton';
+import {api} from '../lib/api';
 
 interface Inquiry {
   id: string;
@@ -27,7 +28,7 @@ export const AdminInquiries = () => {
   const fetchInquiries = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/db/inquiries');
+      const res = await api('/api/db/inquiries');
       if (!res.ok) throw new Error('Failed to fetch inquiries');
       
       const data = await res.json();
@@ -54,7 +55,7 @@ export const AdminInquiries = () => {
     const newStatus = inq.status === 'unread' ? 'read' : 'unread';
     
     try {
-      await fetch(`/api/db/inquiries/${inq.id}`, {
+      await api(`/api/db/inquiries/${inq.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -72,7 +73,7 @@ export const AdminInquiries = () => {
   const handleSaveNote = async (id: string, note: string) => {
     setSavingNote(id);
     try {
-      await fetch(`/api/db/inquiries/${id}`, {
+      await api(`/api/db/inquiries/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ adminNote: note })
@@ -125,7 +126,7 @@ export const AdminInquiries = () => {
     if (!confirm("Delete this inquiry permanently?")) return;
 
     try {
-      await fetch(`/api/db/inquiries/${id}`, { method: 'DELETE' });
+      await api(`/api/db/inquiries/${id}`, { method: 'DELETE' });
       setInquiries(inquiries.filter(i => i.id !== id));
       toast.success("Inquiry deleted successfully");
     } catch (error) {

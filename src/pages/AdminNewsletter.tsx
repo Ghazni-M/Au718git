@@ -10,6 +10,7 @@ import { Mail, Send, Trash2, Users, History, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner';
 import { Skeleton } from '../components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import {api} from '../lib/api';
 
 interface Subscriber {
   id?: string;
@@ -50,8 +51,8 @@ export const AdminNewsletter = () => {
     setLoading(true);
     try {
       const [subRes, campRes] = await Promise.all([
-        fetch('/api/newsletter/subscribers'),
-        fetch('/api/newsletter/campaigns')
+        api('/api/newsletter/subscribers'),
+        api('/api/newsletter/campaigns')
       ]);
 
       if (subRes.ok) setSubscribers(await subRes.json());
@@ -79,7 +80,7 @@ export const AdminNewsletter = () => {
     if (!campaignToDelete) return;
 
     try {
-      const res = await fetch(`/api/newsletter/campaigns/${campaignToDelete}`, { 
+      const res = await api(`/api/newsletter/campaigns/${campaignToDelete}`, { 
         method: 'DELETE' 
       });
 
@@ -123,7 +124,7 @@ export const AdminNewsletter = () => {
     formDataUpload.append('file', file);
 
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: formDataUpload });
+      const res = await api('/api/upload', { method: 'POST', body: formDataUpload });
       if (!res.ok) throw new Error("Upload failed");
       const { url } = await res.json();
       setFormData(prev => ({ ...prev, imageUrl: url }));
@@ -144,7 +145,7 @@ export const AdminNewsletter = () => {
 
     setSending(true);
     try {
-      const response = await fetch('/api/newsletter/send', {
+      const response = await api('/api/newsletter/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

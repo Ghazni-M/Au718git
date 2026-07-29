@@ -4,6 +4,7 @@ import {
 } from '../components/ui/table';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import {api} from '../lib/api';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter
 } from '../components/ui/dialog';
@@ -70,8 +71,8 @@ export const AdminProducts = () => {
     setLoading(true);
     try {
       const [prodRes, catRes] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/categories')
+        api('/api/products'),
+        api('/api/categories')
       ]);
 
       if (prodRes.ok) setProducts(await prodRes.json());
@@ -107,7 +108,7 @@ export const AdminProducts = () => {
 
       const method = editingProduct ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await api(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -147,7 +148,7 @@ export const AdminProducts = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 45000);
 
-      const res = await fetch('/api/upload', {
+      const res = await api('/api/upload', {
         method: 'POST',
         body: formDataUpload,
         signal: controller.signal,
@@ -175,7 +176,7 @@ export const AdminProducts = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this product permanently?")) return;
     try {
-      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const res = await api(`/api/products/${id}`, { method: 'DELETE' });
       if (res.ok) {
         toast.success("Product deleted successfully");
         fetchData();

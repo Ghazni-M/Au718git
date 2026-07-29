@@ -7,6 +7,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { useLanguage } from '../lib/LanguageContext';
+import {api} from '../lib/api';
 
 export const Consultation = () => {
   const { t } = useLanguage();
@@ -31,7 +32,7 @@ export const Consultation = () => {
       preferredDate: formData.preferredDate,
     });
 
-    const response = await fetch('/api/db/inquiries', {
+    const response = await api('/api/db/inquiries', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

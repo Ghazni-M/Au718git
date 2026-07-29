@@ -6,6 +6,7 @@ import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
 import { Shield, Mail, Lock, User as UserIcon, Loader2 } from 'lucide-react';
 import { useAuth } from '../lib/auth';
+import {api} from '../lib/api';
 
 export const AdminSettings = () => {
  const { user, refreshAuth } = useAuth();
@@ -31,7 +32,7 @@ export const AdminSettings = () => {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/update-profile', {
+      const res = await api('/api/auth/update-profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -60,7 +61,7 @@ export const AdminSettings = () => {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/update-password', {
+      const res = await api('/api/auth/update-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

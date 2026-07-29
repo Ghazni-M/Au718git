@@ -17,6 +17,7 @@ import { UserPlus, Trash2, Shield, ShieldAlert, Mail, Loader2 } from 'lucide-rea
 import { toast } from 'sonner';
 import { Skeleton } from '../components/ui/skeleton';
 import { useAuth, AdminRole } from '../lib/auth';
+import {api} from '../lib/api';
 
 interface AdminUser {
   _id: string;
@@ -45,7 +46,7 @@ export const AdminUsers = () => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 7000); // 7s timeout
 
-      const res = await fetch('/api/admin/users', { 
+      const res = await api('/api/admin/users', { 
         signal: controller.signal 
       });
       
@@ -82,7 +83,7 @@ export const AdminUsers = () => {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await api('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -111,7 +112,7 @@ export const AdminUsers = () => {
     if (!confirm(`Revoke access for ${email}?`)) return;
 
     try {
-      const res = await fetch(`/api/admin/users/${encodeURIComponent(email)}`, { method: 'DELETE' });
+      const res = await api(`/api/admin/users/${encodeURIComponent(email)}`, { method: 'DELETE' });
       if (res.ok) {
         toast.success("Access revoked");
         fetchUsers();

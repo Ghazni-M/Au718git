@@ -1,4 +1,5 @@
 import { onCLS, onINP, onLCP, onTTFB, onFCP, Metric } from 'web-vitals';
+import {api} from './lib/api'
 
 let isInitialized = false;
 
@@ -33,7 +34,7 @@ export const sendToGA4 = (metric: Metric) => {
 // Safe Backend Call
 export const sendToBackend = async (metric: Metric) => {
   try {
-    const response = await fetch('/api/performance', {
+    const response = await api('/api/performance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(metric),

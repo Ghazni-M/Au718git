@@ -21,6 +21,7 @@ import { Badge } from '../components/ui/badge';
 import { Skeleton } from '../components/ui/skeleton';
 import { Button } from '../components/ui/button';
 import { Link } from 'react-router-dom';
+import {api} from '../lib/api';
 
 interface DashboardStats {
   products: number;
@@ -65,7 +66,7 @@ export const AdminDashboard = () => {
         setLoading(true);
 
         // Fetch main stats
-        const statsRes = await fetch('/api/dashboard/stats');
+        const statsRes = await api('/api/dashboard/stats');
         if (statsRes.ok) {
           const data = await statsRes.json();
           setStats(data.stats || stats);
@@ -74,7 +75,7 @@ export const AdminDashboard = () => {
         }
 
         // Fetch real inquiry traffic
-        const trafficRes = await fetch('/api/dashboard/inquiry-traffic');
+        const trafficRes = await api('/api/dashboard/inquiry-traffic');
         if (trafficRes.ok) {
           const trafficData = await trafficRes.json();
           setInquiryTraffic(trafficData);

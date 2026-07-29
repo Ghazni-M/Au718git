@@ -6,6 +6,7 @@ import { Product, Review } from '../types';
 import { COMPANY_INFO, WHATSAPP_URL } from '../constants';
 import { Skeleton } from '../components/ui/skeleton';
 import { useLanguage } from '../lib/LanguageContext';
+import {api} from '../lib/api';
 
 // Fallback placeholder image
 const PLACEHOLDER_IMAGE = 'https://picsum.photos/seed/gold/600/800';
@@ -98,8 +99,8 @@ export const Shop = () => {
 
       try {
         const [productsRes, categoriesRes] = await Promise.all([
-          fetch('/api/products?status=published'),
-          fetch('/api/categories')   // ← Important: Use /api/categories
+          api('/api/products?status=published'),
+          api('/api/categories')   // ← Important: Use /api/categories
         ]);
 
         let productData: Product[] = [];

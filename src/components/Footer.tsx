@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { COMPANY_INFO, WHATSAPP_URL } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../lib/LanguageContext';
+import {api} from '../lib/api';
 
 export const Footer = () => {
   const { t } = useLanguage();
@@ -37,7 +38,7 @@ export const Footer = () => {
     setFeedback('');
 
     try {
-      const res = await fetch('/api/newsletter/subscribers', {
+      const res = await api('/api/newsletter/subscribers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim().toLowerCase() })

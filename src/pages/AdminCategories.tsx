@@ -22,6 +22,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Tags, Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '../components/ui/skeleton';
+import {api} from '../lib/api';
 
 interface Category {
   id: string;
@@ -47,8 +48,8 @@ export const AdminCategories = () => {
   setLoading(true);
   try {
     const [catRes, prodRes] = await Promise.all([
-      fetch('/api/db/categories'),
-      fetch('/api/db/products')
+      api('/api/db/categories'),
+      api('/api/db/products')
     ]);
     if (!catRes.ok) throw new Error('Failed to fetch categories');
     if (!prodRes.ok) throw new Error('Failed to fetch products');
@@ -127,9 +128,8 @@ export const AdminCategories = () => {
     }
 
     try {
-      const res = await fetch('/api/db/categories', {
+      const res = await api('/api/db/categories', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name.trim(),
           description: formData.description.trim()
@@ -153,7 +153,7 @@ export const AdminCategories = () => {
     if (!editingCategory || !formData.name.trim()) return;
 
     try {
-      const res = await fetch(`/api/db/categories/${editingCategory.id}`, {
+      const res = await api(`/api/db/categories/${editingCategory.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -184,7 +184,7 @@ export const AdminCategories = () => {
     if (!confirm(`Delete collection "${name}"?`)) return;
 
     try {
-      const res = await fetch(`/api/db/categories/${id}`, { method: 'DELETE' });
+      const res = await api(`/api/db/categories/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
 
       toast.success("Collection deleted successfully");
