@@ -1196,6 +1196,7 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
   });
 
   // ====================== START LISTENING ======================
+  console.log("Dist folder exists?", fs.existsSync(path.join(process.cwd(), 'dist')));
   const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
   });
