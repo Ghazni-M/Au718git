@@ -1157,7 +1157,7 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
   
    // ====================== VITE MIDDLEWARE (ONLY IN DEVELOPMENT) ======================
   if (process.env.NODE_ENV !== "production") {
-    console.log("🛠️ Vite middleware mode activated");
+    console.log("🌐 Running in production mode - API only");
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
