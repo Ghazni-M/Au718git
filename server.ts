@@ -427,7 +427,7 @@ async function startServer() {
     next();
   });
 
-
+  console.log("✅ Basic middleware and root route registered");
   console.log("🚀 Registering API routes...");
 
 
@@ -1152,6 +1152,18 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
       return res.status(400).json({ error: err.message });
     }
     next(err);
+  });
+
+
+    // Global error handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('🚨 Unhandled Error:', err);
+    res.status(500).send('Internal Server Error');
+  });
+
+  // 404 handler
+  app.use((req, res) => {
+    res.status(404).send('Route not found');
   });
 
   
