@@ -419,7 +419,6 @@ async function startServer() {
     `);
   });
 
- 
   // Debug middleware
   app.use((req, res, next) => {
     if (req.path.startsWith('/api')) {
@@ -427,6 +426,7 @@ async function startServer() {
     }
     next();
   });
+
 
   console.log("🚀 Registering API routes...");
 
@@ -1172,7 +1172,7 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
   const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
   });
-  
+
   const shutdown = async () => {
     server.close();
     if (mongoClient) await mongoClient.close();
