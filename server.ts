@@ -1155,9 +1155,9 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
   });
 
   
-   // ====================== VITE MIDDLEWARE (ONLY IN DEVELOPMENT) ======================
+   // ====================== VITE MIDDLEWARE - DISABLED IN PRODUCTION ======================
   if (process.env.NODE_ENV !== "production") {
-    console.log("🌐 Running in production mode - API only");
+    console.log("🛠️ Vite middleware mode activated");
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -1167,13 +1167,12 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
   } else {
     console.log("🌐 Production mode - Serving API only");
   }
-  
+
   // ====================== START LISTENING ======================
   const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(" Registering API routes...");
- });
-
+    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+  });
+  
   const shutdown = async () => {
     server.close();
     if (mongoClient) await mongoClient.close();
