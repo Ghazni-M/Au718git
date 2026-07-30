@@ -1,5 +1,10 @@
 // src/lib/seed.ts
 import ClassicMiamiChainImg from '../images/BIG2AU718.jpg';
+import InvestmentBars from '../images/GOLD-BAR.png';
+import Rings from '../images/RINGALARMIN.jpg';
+import BraceletsImg from '../images/ÀSÌÁ-BRACELET.jpg';
+import NecklacesImg from '../images/AUNECKLACE.jpg';
+import EarRings from '../images/AU718-EARING11.jpg';
 import { api } from './api';
 
 const SAMPLE_PRODUCTS = [
@@ -19,18 +24,8 @@ const SAMPLE_PRODUCTS = [
     karat: "24K",
     price: 890,
     description: "Certified 10g fine gold bar. 999.9 purity. Comes with a certificate of authenticity and unique serial number. Ideal for building high-purity wealth.",
-    images: ["https://picsum.photos/seed/gold-bar-10g/800/1000"],
+    images: [InvestmentBars],
     stock: 20,
-    status: "published" as const,
-  },
-  {
-    name: "Royal 24K Gold Bar (100g)",
-    category: "Investment Bars",
-    karat: "24K",
-    price: 8850,
-    description: "Investment-grade 100g 24K gold bar. The ultimate asset for legacy preservation and serious gold investors.",
-    images: ["https://picsum.photos/seed/gold-bar-100/800/1000"],
-    stock: 5,
     status: "published" as const,
   },
   {
@@ -39,18 +34,8 @@ const SAMPLE_PRODUCTS = [
     karat: "21K",
     price: 2100,
     description: "Bold 21K gold signet ring featuring a center-set VS1 diamond. A symbol of authority and success in fine craftsmanship.",
-    images: ["https://picsum.photos/seed/gold-ring-1/800/1000"],
+    images: [Rings],
     stock: 3,
-    status: "published" as const,
-  },
-  {
-    name: "Eternity Wedding Band",
-    category: "Rings",
-    karat: "18K",
-    price: 750,
-    description: "A seamless 18K gold band representing eternal love. Comfort-fit interior and high-polish exterior.",
-    images: ["https://picsum.photos/seed/gold-ring-band/800/1000"],
-    stock: 15,
     status: "published" as const,
   },
   {
@@ -59,28 +44,8 @@ const SAMPLE_PRODUCTS = [
     karat: "18K",
     price: 680,
     description: "Intricately woven 18K gold rope bracelet. Lightweight yet durable, featuring a secure lobster claw clasp.",
-    images: ["https://picsum.photos/seed/gold-bracelet-1/800/1000"],
+    images: [BraceletsImg],
     stock: 8,
-    status: "published" as const,
-  },
-  {
-    name: "Classic Tennis Bracelet",
-    category: "Bracelets",
-    karat: "18K",
-    price: 1800,
-    description: "Exquisite 18K gold tennis bracelet with high-brilliance finish. A staple of modern elegance.",
-    images: ["https://picsum.photos/seed/gold-tennis/800/1000"],
-    stock: 4,
-    status: "published" as const,
-  },
-  {
-    name: "Majestic Purity 24K Bangle",
-    category: "Bracelets",
-    karat: "24K",
-    price: 3200,
-    description: "Exquisite 24K pure gold bangle with traditional Nigerian etched patterns. A masterpiece of ancestral craftsmanship.",
-    images: ["https://picsum.photos/seed/gold-bangle-24k/800/1000"],
-    stock: 2,
     status: "published" as const,
   },
   {
@@ -89,18 +54,8 @@ const SAMPLE_PRODUCTS = [
     karat: "21K",
     price: 580,
     description: "Solid 21K gold cross pendant. Deeply engraved with classic filigree work. A legacy piece for your personal collection.",
-    images: ["https://picsum.photos/seed/gold-cross/800/1000"],
+    images: [NecklacesImg],
     stock: 12,
-    status: "published" as const,
-  },
-  {
-    name: "Medallion Chain Set",
-    category: "Necklaces",
-    karat: "21K",
-    price: 2450,
-    description: "Bold 21K gold chain with a matching sunburst medallion pendant. Heavy-weight luxury for the modern elite.",
-    images: ["https://picsum.photos/seed/gold-medallion/800/1000"],
-    stock: 3,
     status: "published" as const,
   },
   {
@@ -109,7 +64,7 @@ const SAMPLE_PRODUCTS = [
     karat: "21K",
     price: 920,
     description: "Graceful 21K gold teardrop earrings. Elegant movement and brilliant light reflection. Perfect for special nights out.",
-    images: ["https://picsum.photos/seed/gold-earring-tear/800/1000"],
+    images: [EarRings],
     stock: 6,
     status: "published" as const,
   }
