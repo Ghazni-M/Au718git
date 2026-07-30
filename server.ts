@@ -1156,60 +1156,21 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
     next(err);
   });
 
-  // Serve uploads
-  // ====================== STATIC & ERROR HANDLING ======================
-  app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
-
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    if (err instanceof multer.MulterError) {
-      return res.status(400).json({ error: err.message });
-    }
-    next(err);
-  });
-
-
-    // Global error handler
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('🚨 Unhandled Error:', err);
-    res.status(500).send('Internal Server Error');
-  });
-
-  // 404 handler
-  app.use((req, res) => {
-    res.status(404).send('Route not found');
-  });
-
-
-  // ====================== SERVE FRONTEND IN PRODUCTION ======================
-  if (isProduction) {
-    const frontendPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(frontendPath));
-
-    // Catch-all route for React Router
-    app.get('*', (req, res) => {
-      if (!req.path.startsWith('/api')) {
-        res.sendFile(path.join(frontendPath, 'index.html'));
-      } else {
-        res.status(404).json({ error: 'API route not found' });
-      }
+ 
+   // ====================== VITE MIDDLEWARE - DISABLED IN PRODUCTION ======================
+  if (process.env.NODE_ENV !== "production") {
+    console.log("🛠️ Vite middleware mode activated");
+    const { createServer: createViteServer } = await import('vite');
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
     });
+    app.use(vite.middlewares);
   } else {
-    console.log("🛠️ Development mode - Vite middleware would go here");
+    console.log("🌐 Production mode - Serving API only");
   }
 
-  // Global error handler
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('🚨 Unhandled Error:', err);
-    res.status(500).send('Internal Server Error');
-  });
-
-  // 404 handler
-  app.use((req, res) => {
-    res.status(404).send('Route not found');
-  });
-
   // ====================== START LISTENING ======================
-  console.log("Dist folder exists?", fs.existsSync(path.join(process.cwd(), 'dist')));
   const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
   });
@@ -1224,4 +1185,3 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
 }
 
 startServer().catch(console.error);
-
