@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button';
 import { MessageSquare, Mail, Phone, Trash2, CheckCircle2, Clock, User, Gem } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '../components/ui/skeleton';
-import {api} from '../lib/api';
+import { api } from '../lib/api';
 
 interface Inquiry {
   id: string;
@@ -28,19 +28,16 @@ export const AdminInquiries = () => {
   const fetchInquiries = async () => {
     setLoading(true);
     try {
-      const res = await api('/api/db/inquiries');
-      if (!res.ok) throw new Error('Failed to fetch inquiries');
+      const data = await api('/api/db/inquiries');
       
-      const data = await res.json();
-      
-      // Sort by newest first (client-side fallback)
+      // Sort by newest first
       const sorted = data.sort((a: any, b: any) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       
       setInquiries(sorted);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error("Failed to fetch inquiries:", error);
       toast.error("Failed to load inquiries");
     } finally {
       setLoading(false);
@@ -53,17 +50,17 @@ export const AdminInquiries = () => {
 
   const toggleReadStatus = async (inq: Inquiry) => {
     const newStatus = inq.status === 'unread' ? 'read' : 'unread';
-    
+
     try {
       await api(`/api/db/inquiries/${inq.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
 
       setInquiries(prev => 
         prev.map(i => i.id === inq.id ? { ...i, status: newStatus as any } : i)
       );
+
       toast.success(`Marked as ${newStatus}`);
     } catch (error) {
       toast.error("Failed to update status");
@@ -71,17 +68,19 @@ export const AdminInquiries = () => {
   };
 
   const handleSaveNote = async (id: string, note: string) => {
+    if (!note.trim()) return;
+
     setSavingNote(id);
     try {
       await api(`/api/db/inquiries/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminNote: note })
+        body: JSON.stringify({ adminNote: note.trim() })
       });
 
       setInquiries(prev => 
-        prev.map(i => i.id === id ? { ...i, adminNote: note } : i)
+        prev.map(i => i.id === id ? { ...i, adminNote: note.trim() } : i)
       );
+
       toast.success("Note saved successfully");
     } catch (error) {
       toast.error("Failed to save note");
@@ -105,18 +104,19 @@ export const AdminInquiries = () => {
     if (isEmail) {
       const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(contact)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.open(gmailUrl, '_blank');
-      toast.success(`Opening Gmail to reply...`);
+      toast.success("Opening Gmail to reply...");
     } else {
       const phoneDigits = contact.replace(/\D/g, '');
       if (phoneDigits.length >= 8) {
         const whatsappUrl = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(body)}`;
         window.open(whatsappUrl, '_blank');
-        toast.success(`Opening WhatsApp...`);
+        toast.success("Opening WhatsApp...");
       } else {
         toast.error(`Could not determine contact method for: ${inq.customerContact}`);
       }
     }
 
+    // Mark as read automatically when replying
     if (inq.status === 'unread') {
       toggleReadStatus(inq);
     }
@@ -127,7 +127,7 @@ export const AdminInquiries = () => {
 
     try {
       await api(`/api/db/inquiries/${id}`, { method: 'DELETE' });
-      setInquiries(inquiries.filter(i => i.id !== id));
+      setInquiries(prev => prev.filter(i => i.id !== id));
       toast.success("Inquiry deleted successfully");
     } catch (error) {
       toast.error("Failed to delete inquiry");

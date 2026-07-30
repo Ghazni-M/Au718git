@@ -6,10 +6,10 @@ import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
 import { Shield, Mail, Lock, User as UserIcon, Loader2 } from 'lucide-react';
 import { useAuth } from '../lib/auth';
-import {api} from '../lib/api';
+import { api } from '../lib/api';
 
 export const AdminSettings = () => {
- const { user, refreshAuth } = useAuth();
+  const { user, refreshAuth } = useAuth();
   
   const [loading, setLoading] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -32,18 +32,16 @@ export const AdminSettings = () => {
 
     setLoading(true);
     try {
-      const res = await api('/api/auth/update-profile', {
+      await api('/api/auth/update-profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ displayName: displayName.trim() })
       });
-
-      if (!res.ok) throw new Error('Failed to update profile');
 
       await refreshAuth();
       toast.success("Profile updated successfully");
     } catch (error: any) {
+      console.error(error);
       toast.error(error.message || "Failed to update profile");
     } finally {
       setLoading(false);
@@ -61,10 +59,9 @@ export const AdminSettings = () => {
 
     setLoading(true);
     try {
-      const res = await api('/api/auth/update-password', {
+      await api('/api/auth/update-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           email: user.email,
           currentPassword,
@@ -73,24 +70,20 @@ export const AdminSettings = () => {
         })
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Update failed');
-      }
-
       await refreshAuth();
       toast.success("Security settings updated successfully");
       
+      // Clear sensitive fields
       setNewPassword('');
       setConfirmPassword('');
       setCurrentPassword('');
     } catch (error: any) {
+      console.error(error);
       toast.error(error.message || "Security update failed");
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="space-y-10 max-w-4xl animate-fade-in">

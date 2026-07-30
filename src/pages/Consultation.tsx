@@ -7,7 +7,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { useLanguage } from '../lib/LanguageContext';
-import {api} from '../lib/api';
+import { api } from '../lib/api';
 
 export const Consultation = () => {
   const { t } = useLanguage();
@@ -20,55 +20,50 @@ export const Consultation = () => {
     message: ''
   });
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    console.log("📤 Sending payload:", {
-      customerName: formData.name,
-      customerContact: formData.contact,
-      serviceRequested: formData.service,
-      preferredDate: formData.preferredDate,
-    });
+    try {
+      console.log("📤 Sending payload:", {
+        customerName: formData.name,
+        customerContact: formData.contact,
+        serviceRequested: formData.service,
+        preferredDate: formData.preferredDate,
+      });
 
-    const response = await api('/api/db/inquiries', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      customerName: formData.name,
-      customerContact: formData.contact,
-      type: 'consultation',
-      serviceRequested: formData.service,
-      preferredDate: formData.preferredDate,
-      message: `[CONSULTATION: ${formData.service}] Preferred Date: ${formData.preferredDate}\n\nClient Notes: ${formData.message}`,
-      status: 'unread',
+      await api('/api/db/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: formData.name,
+          customerContact: formData.contact,
+          type: 'consultation',
+          serviceRequested: formData.service,
+          preferredDate: formData.preferredDate,
+          message: `[CONSULTATION: ${formData.service}] Preferred Date: ${formData.preferredDate}\n\nClient Notes: ${formData.message}`,
+          status: 'unread',
+          createdAt: new Date().toISOString()
+        }),
+      });
 
-      // Optional but recommended:
-      createdAt: new Date().toISOString()
-    }),
-  });
-
-    console.log("📥 Response status:", response.status, response.statusText);
-
-    const result = await response.json().catch(() => ({})); // prevent json parse crash
-
-    if (!response.ok) {
-      console.error("❌ API Error:", result);
-      throw new Error(result.error || `HTTP ${response.status}`);
+      toast.success("Consultation request submitted successfully!");
+      
+      // Reset form
+      setFormData({ 
+        name: '', 
+        contact: '', 
+        service: 'Bespoke Jewelry Design', 
+        preferredDate: '', 
+        message: '' 
+      });
+    } catch (error: any) {
+      console.error("🚨 Submit error:", error);
+      toast.error(error.message || "Failed to submit request. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    toast.success("Consultation request submitted successfully!");
-    
-    // Reset form
-    setFormData({ name: '', contact: '', service: 'Bespoke Jewelry Design', preferredDate: '', message: '' });
-  } catch (error: any) {
-    console.error("🚨 Submit error:", error);
-    toast.error(error.message || "Failed to submit request. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="bg-emerald-deep min-h-screen text-white">

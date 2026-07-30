@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { api } from "./api";
 
-
 export type AdminRole = 'Admin' | 'Assistant admin' | null;
 
 export interface SessionUser {
@@ -25,14 +24,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function parseJsonSafely(res: Response) {
-  try {
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -41,13 +32,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applySession = (data: any) => {
     if (data?.uid && data?.email) {
-      setUser({
+      const sessionUser: SessionUser = {
         uid: data.uid,
         email: data.email,
         displayName: data.displayName || undefined,
         isAdmin: !!data.isAdmin,
         role: data.role ?? null,
-      });
+      };
+      setUser(sessionUser);
       setIsAdmin(!!data.isAdmin);
       setRole(data.role ?? null);
     } else {
@@ -59,27 +51,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshAuth = useCallback(async () => {
     setLoading(true);
-
     try {
-      const res = await api('/api/auth/me', {
-
+      const data = await api('/api/auth/me', {
         cache: 'no-store',
       });
 
-      if (res.ok) {
-        const data = await parseJsonSafely(res);
-        applySession(data);
-      } else if (res.status === 401) {
-        // Expected behavior - user not logged in
-        applySession(null);
-      } else {
-        console.warn(`Auth restore failed with status: ${res.status}`);
-        applySession(null);
-      }
+      applySession(data);
     } catch (error: any) {
-      // Suppress common network errors in development
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        console.warn('Auth service temporarily unavailable');
+      // No active session or unauthorized - this is normal
+      if (error.message?.toLowerCase().includes('401') || 
+          error.message?.toLowerCase().includes('unauthorized') ||
+          error.message?.toLowerCase().includes('network error')) {
+        console.debug('No active session');
       } else {
         console.error('Failed to restore session:', error);
       }
@@ -89,38 +72,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Initial auth check
+  // Initial auth check on mount
   useEffect(() => {
     refreshAuth();
   }, [refreshAuth]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await api('/api/auth/login', {
+    const data = await api('/api/auth/login', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-
-    const data = await parseJsonSafely(res);
-
-    if (!res.ok) {
-      throw new Error(data?.error || 'Login failed');
-    }
 
     applySession(data);
     return data;
   }, []);
 
   const signup = useCallback(async (email: string, password: string) => {
-    const res = await api('/api/auth/signup', {
+    const data = await api('/api/auth/signup', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-
-    const data = await parseJsonSafely(res);
-
-    if (!res.ok) {
-      throw new Error(data?.error || 'Signup failed');
-    }
 
     applySession(data);
     return data;
@@ -128,11 +101,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(async () => {
     try {
-      await api('/api/auth/logout', {
-        method: 'POST',
-      });
+      await api('/api/auth/logout', { method: 'POST' });
     } catch (error) {
       console.error('Logout error:', error);
+      // Continue anyway - we want to clear local state
     } finally {
       applySession(null);
     }

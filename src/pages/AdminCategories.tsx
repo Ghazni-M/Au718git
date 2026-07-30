@@ -22,7 +22,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Tags, Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '../components/ui/skeleton';
-import {api} from '../lib/api';
+import { api } from '../lib/api';
 
 interface Category {
   id: string;
@@ -44,55 +44,52 @@ export const AdminCategories = () => {
   });
 
   // Fetch Categories
- const fetchCategories = async () => {
-  setLoading(true);
-  try {
-    const [catRes, prodRes] = await Promise.all([
-      api('/api/db/categories'),
-      api('/api/db/products')
-    ]);
-    if (!catRes.ok) throw new Error('Failed to fetch categories');
-    if (!prodRes.ok) throw new Error('Failed to fetch products');
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const [catData, prodData] = await Promise.all([
+        api<any[]>('/api/db/categories'),
+        api<any[]>('/api/db/products')
+      ]);
 
-    const catData = await catRes.json();
-    const prodData = await prodRes.json();
+      // Count products per category (by id or name)
+      const countsById = new Map<string, number>();
+      const countsByName = new Map<string, number>();
 
-    // Count products per category, matching by id OR by name
-    // (covers whichever field your product form actually saves)
-    const countsById = new Map<string, number>();
-    const countsByName = new Map<string, number>();
+      prodData.forEach((p: any) => {
+        const catId = p.categoryId || p.category?.id;
+        const catName = typeof p.category === 'string' 
+          ? p.category 
+          : p.category?.name || p.categoryName;
 
-    prodData.forEach((p: any) => {
-      const catId = p.categoryId || p.category?.id;
-      const catName = (typeof p.category === 'string' ? p.category : p.category?.name || p.categoryName);
+        if (catId) countsById.set(catId, (countsById.get(catId) || 0) + 1);
+        if (catName) {
+          const key = catName.toLowerCase().trim();
+          countsByName.set(key, (countsByName.get(key) || 0) + 1);
+        }
+      });
 
-      if (catId) countsById.set(catId, (countsById.get(catId) || 0) + 1);
-      if (catName) {
-        const key = catName.toLowerCase().trim();
-        countsByName.set(key, (countsByName.get(key) || 0) + 1);
-      }
-    });
+      const catsWithCounts = catData.map((cat: any) => {
+        const id = cat.id || cat._id || '';
+        const name = cat.name || '';
+        const count = countsById.get(id) ?? countsByName.get(name.toLowerCase().trim()) ?? 0;
 
-    const catsWithCounts = catData.map((cat: any) => {
-      const id = cat.id || cat._id || '';
-      const name = cat.name || '';
-      const count = countsById.get(id) ?? countsByName.get(name.toLowerCase().trim()) ?? 0;
-      return {
-        id,
-        name,
-        description: cat.description || '',
-        productCount: count
-      };
-    });
+        return {
+          id,
+          name,
+          description: cat.description || '',
+          productCount: count
+        };
+      });
 
-    setCategories(catsWithCounts);
-  } catch (error) {
-    console.error("Failed to load categories:", error);
-    toast.error("Failed to load categories");
-  } finally {
-    setLoading(false);
-  }
-};
+      setCategories(catsWithCounts);
+    } catch (error: any) {
+      console.error("Failed to load categories:", error);
+      toast.error("Failed to load categories");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -128,22 +125,22 @@ export const AdminCategories = () => {
     }
 
     try {
-      const res = await api('/api/db/categories', {
+      await api('/api/db/categories', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name.trim(),
           description: formData.description.trim()
         })
       });
 
-      if (!res.ok) throw new Error('Failed to create');
-
       toast.success("Collection created successfully");
       setIsAdding(false);
       setFormData({ name: '', description: '' });
       fetchCategories();
-    } catch (error) {
-      toast.error("Failed to create collection");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to create collection");
     }
   };
 
@@ -153,7 +150,7 @@ export const AdminCategories = () => {
     if (!editingCategory || !formData.name.trim()) return;
 
     try {
-      const res = await api(`/api/db/categories/${editingCategory.id}`, {
+      await api(`/api/db/categories/${editingCategory.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -162,14 +159,13 @@ export const AdminCategories = () => {
         })
       });
 
-      if (!res.ok) throw new Error('Failed to update');
-
       toast.success("Collection updated successfully");
       setEditingCategory(null);
       setFormData({ name: '', description: '' });
       fetchCategories();
-    } catch (error) {
-      toast.error("Failed to update collection");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to update collection");
     }
   };
 
@@ -184,13 +180,12 @@ export const AdminCategories = () => {
     if (!confirm(`Delete collection "${name}"?`)) return;
 
     try {
-      const res = await api(`/api/db/categories/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete');
-
+      await api(`/api/db/categories/${id}`, { method: 'DELETE' });
       toast.success("Collection deleted successfully");
       fetchCategories();
-    } catch (error) {
-      toast.error("Failed to delete collection");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to delete collection");
     }
   };
 
@@ -251,7 +246,7 @@ export const AdminCategories = () => {
               placeholder="Search collections..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none focus-visible:ring-0 textwhite placeholder:text-white/40"
+              className="bg-transparent border-none focus-visible:ring-0 text-white placeholder:text-white/40"
             />
           </div>
 

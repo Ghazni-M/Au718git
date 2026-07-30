@@ -10,7 +10,7 @@ import { Mail, Send, Trash2, Users, History, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner';
 import { Skeleton } from '../components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import {api} from '../lib/api';
+import { api } from '../lib/api';
 
 interface Subscriber {
   id?: string;
@@ -37,7 +37,6 @@ export const AdminNewsletter = () => {
   const [uploading, setUploading] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
 
-  // Delete confirmation dialog state
   const [campaignToDelete, setCampaignToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -50,13 +49,13 @@ export const AdminNewsletter = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [subRes, campRes] = await Promise.all([
+      const [subData, campData] = await Promise.all([
         api('/api/newsletter/subscribers'),
         api('/api/newsletter/campaigns')
       ]);
 
-      if (subRes.ok) setSubscribers(await subRes.json());
-      if (campRes.ok) setCampaigns(await campRes.json());
+      setSubscribers(subData);
+      setCampaigns(campData);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load data");
@@ -69,30 +68,24 @@ export const AdminNewsletter = () => {
     fetchData();
   }, []);
 
-  // Open delete confirmation
   const openDeleteDialog = (id: string) => {
     setCampaignToDelete(id);
     setIsDeleteDialogOpen(true);
   };
 
-  // Execute deletion
   const confirmDeleteCampaign = async () => {
     if (!campaignToDelete) return;
 
     try {
-      const res = await api(`/api/newsletter/campaigns/${campaignToDelete}`, { 
+      await api(`/api/newsletter/campaigns/${campaignToDelete}`, { 
         method: 'DELETE' 
       });
 
-      if (res.ok) {
-        toast.success("Campaign deleted successfully");
-        fetchData();
-      } else {
-        toast.error("Failed to delete campaign");
-      }
+      toast.success("Campaign deleted successfully");
+      fetchData();
     } catch (error) {
       console.error(error);
-      toast.error("Deletion failed");
+      toast.error("Failed to delete campaign");
     } finally {
       setIsDeleteDialogOpen(false);
       setCampaignToDelete(null);
@@ -103,15 +96,11 @@ export const AdminNewsletter = () => {
     if (!id || !confirm("Remove this subscriber permanently?")) return;
 
     try {
-      const res = await fetch(`/api/newsletter/subscribers/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        toast.success("Subscriber removed");
-        fetchData();
-      } else {
-        toast.error("Failed to remove subscriber");
-      }
-    } catch {
-      toast.error("Removal failed");
+      await api(`/api/newsletter/subscribers/${id}`, { method: 'DELETE' });
+      toast.success("Subscriber removed");
+      fetchData();
+    } catch (error) {
+      toast.error("Failed to remove subscriber");
     }
   };
 
@@ -124,11 +113,13 @@ export const AdminNewsletter = () => {
     formDataUpload.append('file', file);
 
     try {
-      const res = await api('/api/upload', { method: 'POST', body: formDataUpload });
-      if (!res.ok) throw new Error("Upload failed");
-      const { url } = await res.json();
-      setFormData(prev => ({ ...prev, imageUrl: url }));
-      toast.success("Cover image uploaded");
+      const result = await api('/api/upload', { 
+        method: 'POST', 
+        body: formDataUpload 
+      });
+
+      setFormData(prev => ({ ...prev, imageUrl: result.url }));
+      toast.success("Cover image uploaded successfully");
     } catch (error: any) {
       toast.error(error.message || "Upload failed");
     } finally {
@@ -145,18 +136,13 @@ export const AdminNewsletter = () => {
 
     setSending(true);
     try {
-      const response = await api('/api/newsletter/send', {
+      const result = await api('/api/newsletter/send', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
-
-      if (!response.ok) throw new Error(result.error || 'Failed to send newsletter');
-
-      toast.success(`Newsletter sent successfully to ${result.sentCount} members!`);
+      toast.success(`Newsletter sent successfully to ${result.sentCount || subscribers.length} members!`);
+      
       setIsComposing(false);
       setFormData({ subject: '', content: '', imageUrl: '' });
       fetchData();
@@ -201,7 +187,6 @@ export const AdminNewsletter = () => {
             </Button>
           </DialogTrigger>
 
-          {/* Compose Dialog Content (unchanged) */}
           <DialogContent className="max-w-5xl bg-neutral-950 border-gold/30 text-white max-h-[92vh] flex flex-col p-0">
             <DialogHeader className="p-6 border-b border-white/10">
               <DialogTitle className="text-2xl font-serif">Create Elite Newsletter</DialogTitle>
@@ -238,7 +223,7 @@ export const AdminNewsletter = () => {
                     </TabsList>
                     <TabsContent value="editor">
                       <textarea
-                        className="w-full h-96 bg-neutral-900 border border-white/20 rounded-lg p-4 text-white font-mono"
+                        className="w-full h-96 bg-neutral-900 border border-white/20 rounded-lg p-4 text-white font-mono resize-y"
                         value={formData.content}
                         onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                         placeholder="Write your newsletter..."
@@ -246,7 +231,11 @@ export const AdminNewsletter = () => {
                       />
                     </TabsContent>
                     <TabsContent value="preview">
-                      <NewsletterPreview content={formData.content} subject={formData.subject} imageUrl={formData.imageUrl} />
+                      <NewsletterPreview 
+                        content={formData.content} 
+                        subject={formData.subject} 
+                        imageUrl={formData.imageUrl} 
+                      />
                     </TabsContent>
                   </Tabs>
                 </div>
@@ -263,7 +252,7 @@ export const AdminNewsletter = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Subscribers Card (unchanged) */}
+        {/* Subscribers */}
         <Card className="lg:col-span-5 bg-neutral-950 border-white/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl">
@@ -375,7 +364,7 @@ export const AdminNewsletter = () => {
         </Card>
       </div>
 
-      {/* Custom Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="bg-neutral-950 border-white/10 text-white max-w-md">
           <DialogHeader>
@@ -386,7 +375,7 @@ export const AdminNewsletter = () => {
           </DialogHeader>
           
           <div className="py-4 text-white/80">
-            Are you sure you want to delete this campaign from history?<br />
+            Are you sure you want to permanently delete this campaign from history?<br />
             <span className="text-red-400 font-medium">This action cannot be undone.</span>
           </div>
 
@@ -394,7 +383,7 @@ export const AdminNewsletter = () => {
             <Button 
               variant="outline" 
               onClick={() => setIsDeleteDialogOpen(false)}
-              className="border-white/20 text-black"
+              className="border-white/20"
             >
               Cancel
             </Button>

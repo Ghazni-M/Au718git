@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { COMPANY_INFO, WHATSAPP_URL } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../lib/LanguageContext';
-import {api} from '../lib/api';
+import { api } from '../lib/api';
 
 export const Footer = () => {
   const { t } = useLanguage();
@@ -38,23 +38,12 @@ export const Footer = () => {
     setFeedback('');
 
     try {
-      const res = await api('/api/newsletter/subscribers', {
+      const result = await api('/api/newsletter/subscribers', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase() })
+        body: JSON.stringify({ 
+          email: email.trim().toLowerCase() 
+        }),
       });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        if (result.error?.toLowerCase().includes('already') || result.error?.includes('exist')) {
-          setStatus('error');
-          setFeedback(t('footer.newsletter.already') || "You're already subscribed!");
-        } else {
-          throw new Error(result.error || 'Subscription failed');
-        }
-        return;
-      }
 
       setStatus('success');
       setFeedback(t('footer.newsletter.success') || "Thank you! You're now part of the Inner Circle.");
@@ -62,12 +51,23 @@ export const Footer = () => {
       setEmail('');
       setTouched(false);
 
-      setTimeout(() => setStatus('idle'), 5000);
+      setTimeout(() => {
+        setStatus('idle');
+        setFeedback('');
+      }, 5000);
 
     } catch (error: any) {
       console.error("Newsletter subscription error:", error);
-      setStatus('error');
-      setFeedback(t('footer.newsletter.error') || "Something went wrong. Please try again.");
+
+      const errorMsg = error.message?.toLowerCase() || '';
+
+      if (errorMsg.includes('already') || errorMsg.includes('exist')) {
+        setStatus('error');
+        setFeedback(t('footer.newsletter.already') || "You're already subscribed!");
+      } else {
+        setStatus('error');
+        setFeedback(t('footer.newsletter.error') || "Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -84,12 +84,13 @@ export const Footer = () => {
             <p className="text-white/60 text-sm leading-relaxed max-w-xs">
               {t('footer.brand_desc')}
             </p>
+
             <div className="flex space-x-4">
               <a 
                 href={`https://instagram.com/${COMPANY_INFO.instagram.replace('@', '')}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-10 h-10 rounded-full border border-gold/20 flex items-center justify-center text-gold hover:bg-gold transition-all duration-500 hover:text-black"
+                className="w-10 h-10 rounded-full border border-gold/20 flex items-center justify-center text-gold hover:bg-gold hover:text-black transition-all duration-300"
               >
                 <FaInstagram size={18} />
               </a>
@@ -97,7 +98,7 @@ export const Footer = () => {
                 href={WHATSAPP_URL(COMPANY_INFO.whatsapp[0].number, "Hello, I'm reaching out from your website footer.")}
                 target="_blank"
                 rel="noreferrer"
-                className="w-10 h-10 rounded-full border border-gold/20 flex items-center justify-center text-gold hover:bg-gold transition-all duration-500 hover:text-black"
+                className="w-10 h-10 rounded-full border border-gold/20 flex items-center justify-center text-gold hover:bg-gold hover:text-black transition-all duration-300"
               >
                 <WhatsAppIcon size={18} />
               </a>
@@ -105,7 +106,7 @@ export const Footer = () => {
                 href="https://www.tiktok.com/@au718goldstore"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border border-gold/20 flex items-center justify-center text-gold hover:bg-gold transition-all duration-500 hover:text-black"
+                className="w-10 h-10 rounded-full border border-gold/20 flex items-center justify-center text-gold hover:bg-gold hover:text-black transition-all duration-300"
               >
                 <TikTokIcon size={18} />
               </a>
@@ -113,7 +114,7 @@ export const Footer = () => {
                 href="https://x.com/Au718golds7516"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border border-gold/20 flex items-center justify-center text-gold hover:bg-gold transition-all duration-500 hover:text-black"
+                className="w-10 h-10 rounded-full border border-gold/20 flex items-center justify-center text-gold hover:bg-gold hover:text-black transition-all duration-300"
               >
                 <FaXTwitter size={18} />
               </a>
@@ -124,11 +125,11 @@ export const Footer = () => {
           <div className="space-y-6">
             <h4 className="text-gold uppercase tracking-widest text-xs font-bold font-sans">{t('footer.quick_links')}</h4>
             <ul className="space-y-3">
-              <li><Link to="/shop" className="text-white/60 hover:text-gold text-sm transition-colors font-sans">{t('footer.link_shop')}</Link></li>
-              <li><Link to="/investment" className="text-white/60 hover:text-gold text-sm transition-colors font-sans">{t('footer.link_invest')}</Link></li>
-              <li><Link to="/custom" className="text-white/60 hover:text-gold text-sm transition-colors font-sans">{t('footer.link_custom')}</Link></li>
-              <li><Link to="/consultation" className="text-white/60 hover:text-gold text-sm transition-colors font-sans">{t('footer.link_consult')}</Link></li>
-              <li><Link to="/locations" className="text-white/60 hover:text-gold text-sm transition-colors font-sans">{t('footer.link_stores')}</Link></li>
+              <li><Link to="/shop" className="text-white/60 hover:text-gold text-sm transition-colors">{t('footer.link_shop')}</Link></li>
+              <li><Link to="/investment" className="text-white/60 hover:text-gold text-sm transition-colors">{t('footer.link_invest')}</Link></li>
+              <li><Link to="/custom" className="text-white/60 hover:text-gold text-sm transition-colors">{t('footer.link_custom')}</Link></li>
+              <li><Link to="/consultation" className="text-white/60 hover:text-gold text-sm transition-colors">{t('footer.link_consult')}</Link></li>
+              <li><Link to="/locations" className="text-white/60 hover:text-gold text-sm transition-colors">{t('footer.link_stores')}</Link></li>
             </ul>
           </div>
 
@@ -138,6 +139,7 @@ export const Footer = () => {
             <p className="text-white/40 text-xs leading-relaxed uppercase tracking-widest font-medium">
               {t('footer.newsletter.title')}
             </p>
+
             <form onSubmit={handleSubmit} className="space-y-3" noValidate>
               <div className="relative">
                 <input 
@@ -153,13 +155,15 @@ export const Footer = () => {
                   onBlur={() => setTouched(true)}
                   placeholder={t('footer.newsletter.placeholder')}
                   required
-                  className={`w-full bg-white/5 border rounded-lg px-4 py-3 text-sm outline-none transition-all placeholder:text-white/20 pr-10 ${
+                  className={`w-full bg-white/5 border rounded-lg px-4 py-3 text-sm outline-none transition-all placeholder:text-white/40 pr-10 ${
                     touched && email
-                      ? isValid ? 'border-emerald-500/50 focus:border-emerald-400' : 'border-red-500/50 focus:border-red-400'
+                      ? isValid 
+                        ? 'border-emerald-500/50 focus:border-emerald-400' 
+                        : 'border-red-500/50 focus:border-red-400'
                       : 'border-gold/20 focus:border-gold'
                   }`}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                   {touched && email && (
                     isValid ? (
                       <CheckCircle2 size={16} className="text-emerald-400" />
@@ -176,10 +180,10 @@ export const Footer = () => {
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -5 }}
-                    className="text-[11px] text-red-400/90 flex items-center gap-1.5"
+                    className="text-[11px] text-red-400 flex items-center gap-1.5"
                   >
                     <AlertCircle size={12} />
-                    <span>{t('footer.validation_format')}</span>
+                    {t('footer.validation_format')}
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -187,15 +191,15 @@ export const Footer = () => {
               <button 
                 type="submit"
                 disabled={status === 'loading'}
-                className="w-full gold-gradient text-black font-extrabold uppercase tracking-widest text-[9px] py-4 rounded-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full gold-gradient text-black font-extrabold uppercase tracking-widest text-[9px] py-4 rounded-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {status === 'loading' ? (
                   <>
-                    <Loader2 size={12} className="animate-spin" />
-                    <span>{t('footer.newsletter.btn_loading') || "SUBSCRIBING..."}</span>
+                    <Loader2 size={14} className="animate-spin" />
+                    {t('footer.newsletter.btn_loading') || "SUBSCRIBING..."}
                   </>
                 ) : (
-                  <span>{t('footer.newsletter.button')}</span>
+                  t('footer.newsletter.button')
                 )}
               </button>
 

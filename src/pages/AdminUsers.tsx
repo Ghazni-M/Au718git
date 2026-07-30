@@ -17,7 +17,7 @@ import { UserPlus, Trash2, Shield, ShieldAlert, Mail, Loader2 } from 'lucide-rea
 import { toast } from 'sonner';
 import { Skeleton } from '../components/ui/skeleton';
 import { useAuth, AdminRole } from '../lib/auth';
-import {api} from '../lib/api';
+import { api } from '../lib/api';
 
 interface AdminUser {
   _id: string;
@@ -44,20 +44,14 @@ export const AdminUsers = () => {
     setLoading(true);
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 7000); // 7s timeout
+      const timeout = setTimeout(() => controller.abort(), 7000);
 
-      const res = await api('/api/admin/users', { 
+      const data = await api<AdminUser[]>('/api/admin/users', { 
         signal: controller.signal 
       });
       
       clearTimeout(timeout);
-
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(Array.isArray(data) ? data : []);
-      } else {
-        toast.error("Failed to load users");
-      }
+      setUsers(Array.isArray(data) ? data : []);
     } catch (error: any) {
       if (error.name === 'AbortError') {
         toast.error("Request timed out");
@@ -83,7 +77,7 @@ export const AdminUsers = () => {
 
     setIsSubmitting(true);
     try {
-      const res = await api('/api/admin/users', {
+      await api('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -92,15 +86,12 @@ export const AdminUsers = () => {
         }),
       });
 
-      const result = await res.json();
-
-      if (!res.ok) throw new Error(result.error || "Failed to add user");
-
       toast.success(`${formData.email} added successfully`);
       setIsAdding(false);
       setFormData({ email: '', role: 'Assistant admin' });
       fetchUsers(); // Refresh list
     } catch (error: any) {
+      console.error(error);
       toast.error(error.message || "Failed to add user");
     } finally {
       setIsSubmitting(false);
@@ -112,16 +103,12 @@ export const AdminUsers = () => {
     if (!confirm(`Revoke access for ${email}?`)) return;
 
     try {
-      const res = await api(`/api/admin/users/${encodeURIComponent(email)}`, { method: 'DELETE' });
-      if (res.ok) {
-        toast.success("Access revoked");
-        fetchUsers();
-      } else {
-        const data = await res.json();
-        toast.error(data.error || "Failed to revoke");
-      }
-    } catch (error) {
-      toast.error("Operation failed");
+      await api(`/api/admin/users/${encodeURIComponent(email)}`, { method: 'DELETE' });
+      toast.success("Access revoked");
+      fetchUsers();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to revoke access");
     }
   };
 

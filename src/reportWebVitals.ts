@@ -1,5 +1,5 @@
 import { onCLS, onINP, onLCP, onTTFB, onFCP, Metric } from 'web-vitals';
-import {api} from './lib/api'
+import { api } from './lib/api';
 
 let isInitialized = false;
 
@@ -17,9 +17,10 @@ export interface PerformanceMetric extends Metric {
   url: string;
 }
 
-// Safe GA4
+// Send to Google Analytics 4
 export const sendToGA4 = (metric: Metric) => {
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+
   if (!measurementId || !window.gtag) return;
 
   window.gtag('event', 'web_vitals', {
@@ -31,39 +32,55 @@ export const sendToGA4 = (metric: Metric) => {
   });
 };
 
-// Safe Backend Call
+// Send to Backend (with safe error handling)
 export const sendToBackend = async (metric: Metric) => {
   try {
-    const response = await api('/api/performance', {
+    const payload: PerformanceMetric = {
+      ...metric,
+      page: document.title,
+      pathname: window.location.pathname,
+      userAgent: navigator.userAgent,
+      timestamp: Date.now(),
+      url: window.location.href,
+    };
+
+    await api('/api/performance', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(metric),
-      keepalive: true,
+      body: JSON.stringify(payload),
+      keepalive: true,           // Important for sending before page unload
     });
-    // Don't throw on 4xx/5xx for performance metrics
-    if (!response.ok) console.warn('Performance API returned non-OK status');
   } catch (err) {
-    // Silent fail - backend might not be running yet
-    console.debug('Performance metric send failed (normal in dev)');
+    // Silent fail in development or if backend is down
+    if (import.meta.env.DEV) {
+      console.debug('Performance metric send failed (expected in dev):', err);
+    }
   }
 };
 
+// Main function
 export function reportWebVitals() {
   if (isInitialized) return;
   isInitialized = true;
 
   const handler = (metric: Metric) => {
     const value = Math.round(metric.value);
+    const color = 
+      metric.rating === 'good' ? '#22c55e' : 
+      metric.rating === 'needs-improvement' ? '#eab308' : '#ef4444';
 
     console.groupCollapsed(`%c[Performance] ${metric.name}: ${value}ms`, 
-      `color: ${metric.rating === 'good' ? '#22c55e' : metric.rating === 'needs-improvement' ? '#eab308' : '#ef4444'}; font-weight: bold`);
+      `color: ${color}; font-weight: bold; font-size: 12px;`);
     console.log(metric);
     console.groupEnd();
 
+    // Send to analytics
     sendToGA4(metric);
-    sendToBackend(metric);   // Safe now
+
+    // Send to backend (non-blocking)
+    sendToBackend(metric);
   };
 
+  // Register all metrics
   onCLS(handler);
   onINP(handler);
   onLCP(handler);

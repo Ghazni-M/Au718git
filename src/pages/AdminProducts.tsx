@@ -4,7 +4,7 @@ import {
 } from '../components/ui/table';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import {api} from '../lib/api';
+import { api } from '../lib/api';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter
 } from '../components/ui/dialog';
@@ -70,17 +70,14 @@ export const AdminProducts = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [prodRes, catRes] = await Promise.all([
-        api('/api/products'),
-        api('/api/categories')
+      const [productsData, categoriesData] = await Promise.all([
+        api<Product[]>('/api/products'),
+        api<any[]>('/api/categories')
       ]);
 
-      if (prodRes.ok) setProducts(await prodRes.json());
-      if (catRes.ok) {
-        const cats = await catRes.json();
-        setCategories(cats.map((c: any) => c.name));
-      }
-    } catch (error) {
+      setProducts(productsData || []);
+      setCategories(categoriesData.map((c: any) => c.name) || []);
+    } catch (error: any) {
       console.error(error);
       toast.error("Failed to load products");
     } finally {
@@ -108,16 +105,11 @@ export const AdminProducts = () => {
 
       const method = editingProduct ? 'PUT' : 'POST';
 
-      const res = await api(url, {
+      await api(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Operation failed");
-      }
 
       toast.success(editingProduct ? "Product updated successfully" : "Product added successfully");
       setIsOpen(false);
@@ -148,7 +140,7 @@ export const AdminProducts = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 45000);
 
-      const res = await api('/api/upload', {
+      const data = await api<{ url: string }>('/api/upload', {
         method: 'POST',
         body: formDataUpload,
         signal: controller.signal,
@@ -156,9 +148,6 @@ export const AdminProducts = () => {
 
       clearTimeout(timeoutId);
 
-      if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-
-      const data = await res.json();
       if (!data.url) throw new Error("No image URL returned");
 
       setFormData(prev => ({ ...prev, images: [...prev.images, data.url] }));
@@ -175,14 +164,14 @@ export const AdminProducts = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this product permanently?")) return;
+    
     try {
-      const res = await api(`/api/products/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        toast.success("Product deleted successfully");
-        fetchData();
-      } else toast.error("Failed to delete product");
-    } catch {
-      toast.error("Delete operation failed");
+      await api(`/api/products/${id}`, { method: 'DELETE' });
+      toast.success("Product deleted successfully");
+      fetchData();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Delete operation failed");
     }
   };
 
@@ -235,6 +224,7 @@ export const AdminProducts = () => {
             </DialogHeader>
 
             <form onSubmit={handleSave} className="space-y-6 pt-4">
+              {/* Form fields remain unchanged */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Product Name</Label>
@@ -313,7 +303,7 @@ export const AdminProducts = () => {
                 />
               </div>
 
-              {/* Images */}
+              {/* Images section unchanged */}
               <div className="space-y-4">
                 <Label>Product Images</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -416,7 +406,7 @@ export const AdminProducts = () => {
         </Dialog>
       </div>
 
-      {/* Products Table */}
+      {/* Products Table - unchanged */}
       <Card className="bg-neutral-950 border-white/10 overflow-hidden">
         <div className="p-6 border-b border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="relative max-w-sm w-full">

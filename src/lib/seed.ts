@@ -1,6 +1,6 @@
-// src/lib/seed.ts  (or seedDatabase.ts)
-
+// src/lib/seed.ts
 import ClassicMiamiChainImg from '../images/BIG2AU718.jpg';
+import { api } from './api';
 
 const SAMPLE_PRODUCTS = [
   {
@@ -122,8 +122,7 @@ export const seedDatabase = async () => {
     console.log("🔄 Checking if database needs seeding...");
 
     // Check if products already exist
-    const productsRes = await fetch('/api/products?limit=5');
-    const existingProducts = productsRes.ok ? await productsRes.json() : [];
+    const existingProducts = await api<any[]>('/api/products?limit=5');
 
     if (existingProducts.length > 0) {
       console.log(`✅ Database already has ${existingProducts.length} products. Skipping seed.`);
@@ -132,33 +131,30 @@ export const seedDatabase = async () => {
 
     console.log("🌱 Seeding initial data...");
 
-    // Seed Categories. Creating a category is now an admin-only action on the
-    // server, so the session cookie needs to actually be sent — same-origin
-    // fetch sends it by default, but `credentials: 'include'` makes that explicit
-    // and keeps this working even if it's ever called from a different origin.
+    // Seed Categories
     for (const catName of CATEGORIES) {
-      const res = await fetch('/api/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ name: catName }),
-      });
-      if (!res.ok) {
-        console.warn(`Failed to seed category "${catName}": ${res.status}`);
+      try {
+        await api('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: catName }),
+        });
+      } catch (err) {
+        console.warn(`Failed to seed category "${catName}":`, err);
       }
     }
     console.log("📂 Categories seeded.");
 
     // Seed Products
     for (const product of SAMPLE_PRODUCTS) {
-      const res = await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(product),
-      });
-      if (!res.ok) {
-        console.warn(`Failed to seed product "${product.name}": ${res.status}`);
+      try {
+        await api('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(product),
+        });
+      } catch (err) {
+        console.warn(`Failed to seed product "${product.name}":`, err);
       }
     }
 
@@ -168,12 +164,3 @@ export const seedDatabase = async () => {
     console.error("❌ Error seeding database:", error);
   }
 };
-
-// NOTE: there used to be an unconditional `if (import.meta.env.DEV) { seedDatabase(); }`
-// here that ran for every visitor on every dev page load, regardless of whether
-// they were logged in. That duplicated — and bypassed — the admin check that
-// `DatabaseBootstrapper` (in App.tsx) already does correctly via `isAdmin`/`loading`,
-// and it's also what was hitting these endpoints unauthenticated and producing the
-// "Error seeding database" / "<!DOCTYPE" console errors even when signed out.
-// Seeding now only ever happens through DatabaseBootstrapper, once an admin is
-// actually signed in.
