@@ -9,9 +9,12 @@ import cookieParser from 'cookie-parser';
 import { randomUUID, randomBytes } from 'crypto';
 import { MongoClient, Db } from 'mongodb';
 import nodemailer from 'nodemailer';
-import 'dotenv/config';   
+import 'dotenv/config';
 import cors from "cors";
 
+console.log("Starting AU718 Backend...");
+console.log("PORT =", process.env.PORT);
+console.log("NODE_ENV =", process.env.NODE_ENV);
 
 // ====================== TYPE EXTENSION ======================
 declare global {
@@ -32,19 +35,13 @@ const SALT_ROUNDS = 10;
 const BOOTSTRAP_ADMIN_EMAIL = 'admin@au718.com';
 
 const JWT_SECRET = process.env.JWT_SECRET || randomBytes(32).toString('hex');
-if (!process.env.JWT_SECRET) {
-  console.warn('⚠️ JWT_SECRET is not set. Using random secret — sessions reset on restart.');
-}
 const JWT_EXPIRES_IN = '7d';
 const SESSION_COOKIE = 'au718_session';
 const isProduction = process.env.NODE_ENV === 'production';
 
 const PUBLIC_COLLECTIONS = ['products', 'categories', 'inquiries', 'subscribers', 'campaigns', 'newsletters', 'performance_metrics'];
 
-const DEFAULT_CATEGORIES = [
-  "Investment Bars", "Chains", "Rings", "Necklaces", "Pendants",
-  "Earrings", "Watches", "Bracelets", "Custom Pieces"
-];
+const DEFAULT_CATEGORIES = ["Investment Bars", "Chains", "Rings", "Necklaces", "Pendants", "Earrings", "Watches", "Bracelets", "Custom Pieces"];
 
 
 function normalizeEmail(email: string): string {
@@ -408,8 +405,8 @@ async function startServer() {
   app.use(cors({
     origin: [
       "http://localhost:5173",
-      "https://au718git-production.up.railway.app/",
       "https://au718goldstore.netlify.app",
+      "https://au718git-production.up.railway.app/",
     ],
     credentials: true,
   }));
@@ -418,6 +415,11 @@ async function startServer() {
   app.use(cookieParser());
 
   const PORT = Number(process.env.PORT) || 3000;
+
+   // Root route for health check
+  app.get("/", (req, res) => {
+    res.send(`<h1>🚀 AU718 Gold Backend Running</h1><p>Time: ${new Date().toISOString()}</p>`);
+  });
 
 
   app.use(express.json({ limit: '2mb' }));
@@ -1149,14 +1151,10 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
 
   
  // Error handling for multer — must be registered after all routes that use
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    if (err instanceof multer.MulterError) {
-      if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ error: 'File too large (max 10MB)' });
-      }
-      return res.status(400).json({ error: err.message });
-    }
-    next(err);
+  
+ app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
   });
 
  
@@ -1175,16 +1173,24 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
 
   // ====================== START LISTENING ======================
   const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 
+
+  // Graceful shutdown
   const shutdown = async () => {
+    console.log('Shutting down...');
     server.close();
     if (mongoClient) await mongoClient.close();
     process.exit(0);
   };
+
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
 }
 
-startServer().catch(console.error);
+startServer().catch((err) => {
+  console.error("❌ Failed to start server:", err);
+  process.exit(1);
+});
