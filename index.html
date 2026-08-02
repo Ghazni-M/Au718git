@@ -3,19 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://au718git-production.up.railway.app http://localhost:*; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="/public/favicon_io/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon_io/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon_io/favicon-16x16.png">
-    <link rel="manifest" href="/public/favicon_io/site.webmanifest">
+    <!-- Content Security Policy - Updated for your backend + external services -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      connect-src 'self' 
+        https://au718git-production.up.railway.app 
+        https://*.mongodb.net 
+        https://*.netlify.app 
+        https://*.googleapis.com 
+        ws://localhost:* 
+        http://localhost:*;
+      img-src 'self' data: https: blob:;
+      script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com;
+      style-src 'self' 'unsafe-inline' https:;
+      font-src 'self' https:;
+      frame-src 'self';
+    ">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Au718 Gold Store</title>
+    <title>AU718 Gold Store</title>
     <meta name="description" content="Premium Gold Jewelry & Investment - AU718 Gold Store" />
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     
-    <!-- Open Graph / Social Media -->
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="/favicon_io/site.webmanifest">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+    <!-- Open Graph -->
     <meta property="og:title" content="AU718 Gold Store" />
     <meta property="og:description" content="Premium Gold Jewelry & Investment" />
     <meta property="og:type" content="website" />
@@ -25,13 +41,13 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 
-
-   <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-SJ2LVGXETJ');
-  </script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SJ2LVGXETJ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-SJ2LVGXETJ');
+    </script>
   </body>
 </html>
