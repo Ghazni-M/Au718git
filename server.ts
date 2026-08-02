@@ -97,27 +97,32 @@ let mongoConnectionError = '';
 
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
+
 async function connectToMongo() {
   if (!MONGODB_URI) {
-    console.warn('⚠️ MONGODB_URI is not set. Using local file fallback.');
-    mongoConnectionError = 'MONGODB_URI is not set.';
+    console.warn('⚠️ No MONGODB_URI → using local JSON fallback');
     return;
   }
 
   try {
-    console.log('🔌 Connecting to MongoDB...');
-    mongoClient = new MongoClient(MONGODB_URI, { connectTimeoutMS: 8000, serverSelectionTimeoutMS: 8000 });
+    console.log('🔌 Connecting to MongoDB Atlas...');
+
+    mongoClient = new MongoClient(MONGODB_URI, {
+      connectTimeoutMS: 20000,
+      serverSelectionTimeoutMS: 20000,
+      socketTimeoutMS: 60000,
+      family: 4,                    // Force IPv4
+      tls: true,
+      tlsAllowInvalidCertificates: process.env.NODE_ENV !== 'production', // Only for dev
+    });
+
     await mongoClient.connect();
     mongoDb = mongoClient.db();
     isMongoConnected = true;
-    mongoConnectionError = '';
-    console.log('✅ MongoDB connected successfully!');
-    await seedMongoFromLocal();
-    await seedDefaultCategories();
+    console.log('✅ MongoDB Atlas connected successfully!');
   } catch (err: any) {
+    console.error('❌ MongoDB connection failed:', err.message);
     isMongoConnected = false;
-    mongoConnectionError = err.message || String(err);
-    console.error('❌ MongoDB connection failed:', err);
   }
 }
 

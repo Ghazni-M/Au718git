@@ -23,16 +23,20 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       strictPort: true,
 
-      // Proxy to Railway backend
-      proxy: {
+        proxy: {
         '/api': {
           target: 'https://au718git-production.up.railway.app',
           changeOrigin: true,
-          secure: true,           // Railway uses HTTPS
+          secure: true,
           timeout: 30000,
           proxyTimeout: 30000,
-          rewrite: (path) => path.replace(/^\/api/, '/api'), // optional
-        },
+          // Force all /api calls through proxy
+          configure: (proxy, options) => {
+            proxy.on('error', (err, req, res) => {
+              console.log('Proxy error', err);
+            });
+          }
+        }
       },
 
       watch: {
