@@ -407,14 +407,17 @@ async function startServer() {
   const app = express();
 
   // CORS - Update with your actual frontend URL if needed
+  
   app.use(cors({
     origin: [
       "https://au718store.netlify.app",
-      "https://au718git-production.up.railway.app/",
-       "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:3000"
     ],
-    credentials: true,
+    credentials: true
   }));
+
+
 
   app.use(express.json({ limit: "2mb" }));
   app.use(cookieParser());
@@ -1024,8 +1027,8 @@ app.post('/api/auth/update-password', requireAuth, async (req: AuthedRequest, re
 
       res.cookie(SESSION_COOKIE, token, {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: isProduction,
+        sameSite: 'none',
+        secure: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/'
       });
@@ -1089,7 +1092,7 @@ app.post('/api/auth/update-password', requireAuth, async (req: AuthedRequest, re
   });
 
   app.post('/api/auth/logout', (req, res) => {
-    res.clearCookie(SESSION_COOKIE, { path: '/' });
+    res.clearCookie(SESSION_COOKIE, { path: '/', sameSite:'none', secure:true });
     res.json({ success: true });
   });
 
