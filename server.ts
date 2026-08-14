@@ -422,12 +422,6 @@ async function startServer() {
 
   const PORT = Number(process.env.PORT) || 3000;
 
-   // Root route for health check
-  app.get("/", (req, res) => {
-    res.send(`<h1>🚀 AU718 Gold Backend Running</h1><p>Time: ${new Date().toISOString()}</p>`);
-  });
-
-
   app.use(express.json({ limit: '2mb' }));
   app.use(cookieParser());
 
