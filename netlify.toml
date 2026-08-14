@@ -3,11 +3,10 @@
 [build]
   command = "npm run build"
   publish = "dist"
-  # node_version = "20"   # Optional: Netlify usually handles this well
 
 [build.environment]
   NODE_ENV = "development"
-  NODE_VERSION = "20
+  NODE_VERSION = "20"
 
 # SPA Routing for React Router
 [[redirects]]
@@ -28,17 +27,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = """
-      default-src 'self';
-      script-src 'self' 'unsafe-inline';
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' data: https:;
-      font-src 'self' data:;
-      connect-src 'self' 
-        https://*.mongodb.net 
-        https://*.netlify.app 
-        https://generativelanguage.googleapis.com;
-    """
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.mongodb.net https://*.netlify.app https://generativelanguage.googleapis.com;"
 
 [functions]
   directory = "netlify/functions"
