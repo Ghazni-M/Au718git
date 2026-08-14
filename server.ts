@@ -1067,8 +1067,8 @@ app.post('/api/auth/update-password', requireAuth, async (req: AuthedRequest, re
 
       res.cookie(SESSION_COOKIE, token, {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: isProduction,
+        sameSite: 'none',
+        secure: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/'
       });
