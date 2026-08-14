@@ -9,7 +9,6 @@
   NODE_VERSION = "20"
   SECRETS_SCAN_OMIT_KEYS = "NODE_ENV"
   SECRETS_SCAN_ENABLED = "false"
-  
 
 # SPA Routing for React Router
 [[redirects]]
@@ -26,13 +25,11 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
-
 # Content Security Policy
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://au718git-production.up.railway.app https://*.mongodb.net https://*.netlify.app https://generativelanguage.googleapis.com https://www.google-analytics.com; frame-src 'self';"
-
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://au718git-production.up.railway.app https://*.mongodb.net https://*.netlify.app https://generativelanguage.googleapis.com https://www.google-analytics.com https://www.google.com; frame-src 'self';"
 
 [functions]
   directory = "netlify/functions"

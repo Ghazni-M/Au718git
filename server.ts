@@ -409,9 +409,9 @@ async function startServer() {
   // CORS - Update with your actual frontend URL if needed
   app.use(cors({
     origin: [
-      "http://localhost:5173",
       "https://au718store.netlify.app",
       "https://au718git-production.up.railway.app/",
+       "http://localhost:3000",
     ],
     credentials: true,
   }));
