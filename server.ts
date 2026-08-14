@@ -410,7 +410,7 @@ async function startServer() {
   app.use(cors({
     origin: [
       "http://localhost:5173",
-      "https://au718goldstore.netlify.app",
+      "https://au718store.netlify.app",
       "https://au718git-production.up.railway.app/",
     ],
     credentials: true,
