@@ -92,58 +92,40 @@ export const Shop = () => {
     setActiveCategory(cat);
   }, [searchParams]);
 
-  // Fetch Products & Categories
+  // Fetch Products & Categories  ← FIXED
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setLoadError(false);
 
       try {
-        const [productsRes, categoriesRes] = await Promise.all([
-          api('/api/products?status=published'),
-          api('/api/categories')   // ← Important: Use /api/categories
+        const [productData, catData] = await Promise.all([
+          api<Product[]>('/api/products?status=published'),
+          api<any[]>('/api/categories')
         ]);
 
-        let productData: Product[] = [];
+        const productsList = Array.isArray(productData) ? productData : [];
+        setProducts(productsList);
 
-        // Products
-        if (productsRes.ok) {
-          productData = await productsRes.json();
-          setProducts(productData);
 
-          const weightData = productData
-            .map((p: Product) => p.weight)
-            .filter((w): w is string => Boolean(w));
+        const weightData = productsList
+          .map((p: Product) => p.weight)
+          .filter((w): w is string => Boolean(w));
+        setWeights(['all', ...Array.from(new Set(weightData))]);
 
-          setWeights(['all', ...Array.from(new Set(weightData))]);
-        }
-
-        // Categories
-        if (categoriesRes.ok) {
-          const catData = await categoriesRes.json();
-          
-          if (Array.isArray(catData) && catData.length > 0) {
-            const catNames = catData.map((c: any) => 
-              typeof c === 'string' ? c : (c.name || c.title || '')
-            ).filter(Boolean);
-
-            setCategories(['all', ...Array.from(new Set(catNames))]);
-          } else {
-            // Fallback from products
-            const productCats = Array.from(new Set(
-              productData.map(p => p.category).filter(Boolean)
-            ));
-            setCategories(['all', ...productCats]);
-          }
+        if (Array.isArray(catData) && catData.length > 0) {
+          const catNames = catData
+            .map((c: any) => (typeof c === 'string' ? c : c.name || c.title || ''))
+            .filter(Boolean);
+          setCategories(['all', ...Array.from(new Set(catNames))]);
         } else {
-          // Fallback
-          const productCats = Array.from(new Set(
-            productData.map(p => p.category).filter(Boolean)
-          ));
+          const productCats = Array.from(
+            new Set(productsList.map((p) => p.category).filter(Boolean) as string[])
+          );
           setCategories(['all', ...productCats]);
         }
       } catch (error) {
-        console.error("Failed to fetch shop data:", error);
+        console.error('Failed to fetch shop data:', error);
         setLoadError(true);
       } finally {
         setIsLoading(false);
@@ -152,7 +134,7 @@ export const Shop = () => {
 
     fetchData();
   }, []);
-
+  
   // Lock scroll
   useEffect(() => {
     if (isFilterOpen || selectedProduct) {
