@@ -21,6 +21,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger 
 } from '../components/ui/dropdown-menu';
 
+import { getImageUrl } from '../lib/utils';
+
 interface Product {
   _id?: string;
   id?: string;
@@ -358,7 +360,7 @@ export const AdminProducts = () => {
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
                   {formData.images.map((img, i) => (
                     <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-white/10 group">
-                      <img src={img} alt="preview" className="w-full h-full object-cover" />
+                      <img src={getImageUrl(img)} alt="preview" className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => setFormData(prev => ({
@@ -445,7 +447,7 @@ export const AdminProducts = () => {
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-neutral-900">
                           {p.images?.[0] ? (
-                            <img src={p.images[0]} className="w-full h-full object-cover" alt={p.name} />
+                            <img src={getImageUrl(p.images[0])} className="w-full h-full object-cover" alt={p.name} />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <ImageIcon size={20} className="text-white/30" />

@@ -7,6 +7,7 @@ import { COMPANY_INFO, WHATSAPP_URL } from '../constants';
 import { Skeleton } from '../components/ui/skeleton';
 import { useLanguage } from '../lib/LanguageContext';
 import {api} from '../lib/api';
+import { getImageUrl } from '../lib/utils';
 
 // Fallback placeholder image
 const PLACEHOLDER_IMAGE = 'https://picsum.photos/seed/gold/600/800';
@@ -324,7 +325,7 @@ export const Shop = () => {
                 <motion.div layout key={product.id} className="group" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
                   {/* Your product card code remains the same */}
                   <div onClick={() => setSelectedProduct(product)} className="relative aspect-[3/4] overflow-hidden rounded-none border border-amber-400/20 bg-emerald-900 mb-6 cursor-pointer">
-                    <img src={product.image ?? product.images?.[0] ?? PLACEHOLDER_IMAGE} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" referrerPolicy="no-referrer" />
+                    <img src={getImageUrl(product.image ?? product.images?.[0]) ?? PLACEHOLDER_IMAGE} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" referrerPolicy="no-referrer" />
                     <div className="absolute top-4 right-4 bg-emerald-950/90 backdrop-blur-md px-3 py-1 rounded-none border border-amber-400/30 z-20">
                       <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest">{product.karat}</span>
                     </div>
@@ -497,11 +498,15 @@ const ProductDetailModal = ({ product, onClose, relatedProducts, onSelectProduct
 
   const ENGRAVING_MAX_LENGTH = 40;
 
+
   const images = useMemo(() => {
-    if (product.images && product.images.length > 0) return product.images;
-    if (product.image) return [product.image];
-    return [PLACEHOLDER_IMAGE];
-  }, [product.images, product.image]);
+  let list: string[] = [];
+  if (product.images && product.images.length > 0) list = product.images;
+  else if (product.image) list = [product.image];
+  else return [PLACEHOLDER_IMAGE];
+
+  return list.map(getImageUrl);
+}, [product.images, product.image]);
 
   // Reset indices and options when product switches
   useEffect(() => {
@@ -884,7 +889,7 @@ const ProductDetailModal = ({ product, onClose, relatedProducts, onSelectProduct
                     >
                       <div className="w-20 h-20 rounded-lg overflow-hidden border border-amber-400/15 group-hover/related:border-amber-400/50 transition-all mb-1.5 bg-emerald-950">
                         <img
-                          src={rp.image ?? rp.images?.[0] ?? PLACEHOLDER_THUMB}
+                          src={getImageUrl(rp.image ?? rp.images?.[0]) || PLACEHOLDER_THUMB}
                           alt={rp.name}
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"
