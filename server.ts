@@ -406,6 +406,8 @@ async function startServer() {
 
   const app = express();
 
+  app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
+
   // CORS - Update with your actual frontend URL if needed
   
   app.use(cors({
@@ -417,10 +419,6 @@ async function startServer() {
     credentials: true
   }));
 
-
-
-  app.use(express.json({ limit: "2mb" }));
-  app.use(cookieParser());
 
   const PORT = Number(process.env.PORT) || 3000;
 
