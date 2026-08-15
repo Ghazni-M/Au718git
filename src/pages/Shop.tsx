@@ -70,10 +70,10 @@ const ReviewsSection = () => {
 
 export const Shop = () => {
   const { t } = useLanguage();
-  const [searchParams] = useSearchParams();
-  const initialCat = (searchParams.get('cat') as Product['category'] | 'all') || 'all';
+  
 
-  const [activeCategory, setActiveCategory] = useState<Product['category'] | 'all'>(initialCat);
+
+  const [activeCategory, setActiveCategory] = useState<Product['category'] | 'all'>('all');
   const [activeKarat, setActiveKarat] = useState<Product['karat'] | 'all'>('all');
   const [activeWeight, setActiveWeight] = useState<string | 'all'>('all');
 
@@ -86,12 +86,6 @@ export const Shop = () => {
   const [loadError, setLoadError] = useState(false);
 
   const karats = ['all', '18K', '21K', '22K', '24K'];
-
-  useEffect(() => {
-    const cat = (searchParams.get('cat') as Product['category'] | 'all') || 'all';
-    setActiveCategory(cat);
-  }, [searchParams]);
-
 
   // Fetch products and categories
   // Products are loaded independently so a category API failure
@@ -295,15 +289,43 @@ export const Shop = () => {
     }
   }, [isFilterOpen, selectedProduct]);
 
+
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const categoryMatch = activeCategory === 'all' || 
-        p.category?.toLowerCase() === activeCategory.toLowerCase();
-      const karatMatch = activeKarat === 'all' || p.karat === activeKarat;
-      const weightMatch = activeWeight === 'all' || p.weight === activeWeight;
-      return categoryMatch && karatMatch && weightMatch;
-    });
-  }, [products, activeCategory, activeKarat, activeWeight]);
+  const normalize = (value: unknown) =>
+    String(value ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, ' ');
+
+  return products.filter((product) => {
+    const productCategory = normalize(product.category);
+    const selectedCategory = normalize(activeCategory);
+
+    const productKarat = normalize(product.karat);
+    const selectedKarat = normalize(activeKarat);
+
+    const productWeight = normalize(product.weight);
+    const selectedWeight = normalize(activeWeight);
+
+    const categoryMatch =
+      selectedCategory === 'all' ||
+      selectedCategory === '' ||
+      productCategory === selectedCategory;
+
+    const karatMatch =
+      selectedKarat === 'all' ||
+      selectedKarat === '' ||
+      productKarat === selectedKarat;
+
+    const weightMatch =
+      selectedWeight === 'all' ||
+      selectedWeight === '' ||
+      productWeight === selectedWeight;
+
+    return categoryMatch && karatMatch && weightMatch;
+  });
+}, [products, activeCategory, activeKarat, activeWeight]);
+
 
   const clearFilters = () => {
     setActiveCategory('all');
