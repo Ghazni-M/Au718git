@@ -307,7 +307,7 @@ export const Shop = () => {
                 <motion.div layout key={product.id} className="group" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
                   {/* Your product card code remains the same */}
                   <div onClick={() => setSelectedProduct(product)} className="relative aspect-[3/4] overflow-hidden rounded-none border border-amber-400/20 bg-emerald-900 mb-6 cursor-pointer">
-                    <img src={getImageUrl(product.image ?? product.images?.[0]) ?? PLACEHOLDER_IMAGE} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" referrerPolicy="no-referrer" />
+                    <img src={getImageUrl(product.image ?? product.images?.[0]) || PLACEHOLDER_IMAGE} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" referrerPolicy="no-referrer" />
                     <div className="absolute top-4 right-4 bg-emerald-950/90 backdrop-blur-md px-3 py-1 rounded-none border border-amber-400/30 z-20">
                       <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest">{product.karat}</span>
                     </div>
@@ -718,7 +718,7 @@ const ProductDetailModal = ({ product, onClose, relatedProducts, onSelectProduct
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-amber-400 uppercase tracking-[4px] text-[10px] font-bold block">{product.karat} {t('shop.purity_grade', 'High-End Purity')}</span>
-              <span className="text-white/40 text-[9px] font-mono">ID: #{product.id.slice(0, 5).toUpperCase()}</span>
+              <span className="text-white/40 text-[9px] font-mono">ID: #{(product.id || '').slice(0, 5).toUpperCase()}</span>
             </div>
             <h2 className="text-2xl md:text-3xl font-serif text-white mb-4 uppercase leading-tight font-medium tracking-wide">{product.name}</h2>
             
