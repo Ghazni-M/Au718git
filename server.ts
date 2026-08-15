@@ -409,15 +409,28 @@ async function startServer() {
   app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
 
   // CORS - Update with your actual frontend URL if needed
-  
-  app.use(cors({
-    origin: [
-      "https://au718store.netlify.app",
-      "http://localhost:5173",
-      "http://localhost:3000"
-    ],
-    credentials: true
-  }));
+
+
+  const allowedOriginPatterns = [
+  /^https:\/\/au718store\.netlify\.app$/,               // production
+  /^https:\/\/[a-z0-9]+--au718store\.netlify\.app$/,     // Netlify deploy previews
+  /^http:\/\/localhost:\d+$/,                            // any localhost port
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // curl, Postman, server-to-server
+    const isAllowed = allowedOriginPatterns.some((pattern) => pattern.test(origin));
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 
 
   const PORT = Number(process.env.PORT) || 3000;
@@ -1149,10 +1162,12 @@ app.delete('/api/admin/users/:email', requireAuth, requireAdmin, async (req, res
   }
 });
 
-  
- // Error handling for multer — must be registered after all routes that use
-  
+
+  // Error handling — must be registered after all routes
  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (err.message === 'Not allowed by CORS') {
+      return res.status(403).json({ error: 'CORS: origin not allowed' });
+    }
     console.error(err);
     res.status(500).json({ error: 'Internal Server Error' });
   });

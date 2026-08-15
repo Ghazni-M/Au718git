@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Filter, X, Star, Quote, Package, ChevronLeft, ChevronRight, Maximize2, ShieldCheck, Gift, Truck, Check, Share2, Sparkles } from 'lucide-react';
 import { Product, Review } from '../types';
