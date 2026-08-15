@@ -92,47 +92,198 @@ export const Shop = () => {
     setActiveCategory(cat);
   }, [searchParams]);
 
-  // Fetch Products & Categories  ← FIXED
+
+  // Fetch products and categories
+  // Products are loaded independently so a category API failure
+  // cannot prevent the products from being displayed.
   useEffect(() => {
+    let cancelled = false;
+
     const fetchData = async () => {
       setIsLoading(true);
       setLoadError(false);
 
       try {
-        const [productData, catData] = await Promise.all([
-          api<Product[]>('/api/products?status=published'),
-          api<any[]>('/api/categories')
-        ]);
+        // ---------------------------------------------------------
+        // 1. Fetch PRODUCTS independently
+        // ---------------------------------------------------------
+        let productData: any;
 
-        const productsList = Array.isArray(productData) ? productData : [];
+        try {
+          /*
+           * Do NOT force ?status=published here.
+           *
+           * The Railway /api/products endpoint has already been
+           * confirmed to return the products correctly.
+           */
+          productData = await api<any>('/api/products');
+        } catch (error) {
+          console.error('Failed to fetch products:', error);
+
+          if (!cancelled) {
+            setProducts([]);
+            setLoadError(true);
+          }
+
+          return;
+        }
+
+        if (cancelled) return;
+
+        // ---------------------------------------------------------
+        // 2. Normalize the products response
+        // ---------------------------------------------------------
+        let productsList: Product[] = [];
+
+        if (Array.isArray(productData)) {
+          productsList = productData;
+        } else if (
+          productData &&
+          Array.isArray(productData.products)
+        ) {
+          productsList = productData.products;
+        } else if (
+          productData &&
+          Array.isArray(productData.data)
+        ) {
+          productsList = productData.data;
+        }
+
+        console.log('Products returned from API:', productData);
+        console.log('Normalized products:', productsList);
+
         setProducts(productsList);
 
-
+        // ---------------------------------------------------------
+        // 3. Build weight filters from products
+        // ---------------------------------------------------------
         const weightData = productsList
           .map((p: Product) => p.weight)
-          .filter((w): w is string => Boolean(w));
-        setWeights(['all', ...Array.from(new Set(weightData))]);
-
-        if (Array.isArray(catData) && catData.length > 0) {
-          const catNames = catData
-            .map((c: any) => (typeof c === 'string' ? c : c.name || c.title || ''))
-            .filter(Boolean);
-          setCategories(['all', ...Array.from(new Set(catNames))]);
-        } else {
-          const productCats = Array.from(
-            new Set(productsList.map((p) => p.category).filter(Boolean) as string[])
+          .filter(
+            (w): w is string =>
+              typeof w === 'string' && w.trim().length > 0
           );
-          setCategories(['all', ...productCats]);
+
+        setWeights([
+          'all',
+          ...Array.from(new Set(weightData)),
+        ]);
+
+        // ---------------------------------------------------------
+        // 4. Build categories from products FIRST
+        // ---------------------------------------------------------
+        const productCats = Array.from(
+          new Set(
+            productsList
+              .map((p: Product) => p.category)
+              .filter(
+                (category): category is string =>
+                  typeof category === 'string' &&
+                  category.trim().length > 0
+              )
+          )
+        );
+
+        setCategories(['all', ...productCats]);
+
+        // ---------------------------------------------------------
+        // 5. Fetch categories separately
+        //
+        // If this fails, products STILL remain visible.
+        // ---------------------------------------------------------
+        try {
+          const catData = await api<any>('/api/categories');
+
+          if (cancelled) return;
+
+          let categoryList: string[] = [];
+
+          if (Array.isArray(catData)) {
+            categoryList = catData
+              .map((category: any) => {
+                if (typeof category === 'string') {
+                  return category;
+                }
+
+                return (
+                  category?.name ||
+                  category?.title ||
+                  category?.category ||
+                  ''
+                );
+              })
+              .filter(
+                (category: any): category is string =>
+                  typeof category === 'string' &&
+                  category.trim().length > 0
+              );
+          } else if (
+            catData &&
+            Array.isArray(catData.categories)
+          ) {
+            categoryList = catData.categories
+              .map((category: any) => {
+                if (typeof category === 'string') {
+                  return category;
+                }
+
+                return (
+                  category?.name ||
+                  category?.title ||
+                  category?.category ||
+                  ''
+                );
+              })
+              .filter(
+                (category: any): category is string =>
+                  typeof category === 'string' &&
+                  category.trim().length > 0
+              );
+          }
+
+          if (categoryList.length > 0) {
+            setCategories([
+              'all',
+              ...Array.from(new Set(categoryList)),
+            ]);
+          }
+        } catch (categoryError) {
+          /*
+           * Categories are optional for displaying products.
+           *
+           * Keep the categories generated from the products
+           * instead of making the entire shop fail.
+           */
+          console.warn(
+            'Categories could not be loaded. Using product categories instead:',
+            categoryError
+          );
+        }
+
+        if (!cancelled) {
+          setLoadError(false);
         }
       } catch (error) {
-        console.error('Failed to fetch shop data:', error);
-        setLoadError(true);
+        console.error('Failed to initialize shop:', error);
+
+        if (!cancelled) {
+          setProducts([]);
+          setCategories(['all']);
+          setWeights(['all']);
+          setLoadError(true);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
   
   // Lock scroll
